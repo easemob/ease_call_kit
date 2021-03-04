@@ -1,0 +1,47 @@
+PODS:
+  - AgoraRtcEngine_iOS (3.3.0)
+  - ease_call_kit (0.0.1):
+    - AgoraRtcEngine_iOS (= 3.3.0)
+    - EaseCallKit (= 3.8.0.2)
+    - Flutter
+  - EaseCallKit (3.8.0.2):
+    - HyphenateChat
+    - Masonry
+    - SDWebImage (~> 3.7.2)
+  - Flutter (1.0.0)
+  - HyphenateChat (3.8.0)
+  - Masonry (1.1.0)
+  - SDWebImage (3.7.6):
+    - SDWebImage/Core (= 3.7.6)
+  - SDWebImage/Core (3.7.6)
+
+DEPENDENCIES:
+  - ease_call_kit (from `.symlinks/plugins/ease_call_kit/ios`)
+  - Flutter (from `Flutter`)
+
+SPEC REPOS:
+  trunk:
+    - AgoraRtcEngine_iOS
+    - EaseCallKit
+    - HyphenateChat
+    - Masonry
+    - SDWebImage
+
+EXTERNAL SOURCES:
+  ease_call_kit:
+    :path: ".symlinks/plugins/ease_call_kit/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  AgoraRtcEngine_iOS: 1a0adbf959ab5175b700c8bab30b1346fc27ef1a
+  ease_call_kit: 70d2529a063a9bcdd297270ee2595809e690293e
+  EaseCallKit: 2a014f5de84895f3d390ba680661818d13ba7520
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  HyphenateChat: 254bab73137e88ffb6394ad5de0c8941e0e2d3d7
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  SDWebImage: c325cf02c30337336b95beff20a13df489ec0ec9
+
+PODFILE CHECKSUM: f7ecce632c561a077491bb96eace2c0b5f41bf3b
+
+COCOAPODS: 1.10.0
