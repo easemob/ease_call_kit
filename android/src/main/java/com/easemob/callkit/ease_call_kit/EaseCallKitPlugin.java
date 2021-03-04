@@ -1,6 +1,5 @@
 package com.easemob.callkit.ease_call_kit;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;

@@ -74,15 +74,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  im_flutter_sdk:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: stable
-      resolved-ref: f99990833ab3203d15f6bd6559c60a15bc017654
-      url: "https://github.com/easemob/im_flutter_sdk.git"
-    source: git
-    version: "1.0.0"
   matcher:
     dependency: transitive
     description:

@@ -55,6 +55,6 @@ flutter {
 
 dependencies {
     implementation 'com.hyphenate:hyphenate-chat:3.8.0'
-    implementation 'com.hyphenate:ease-call-kit:3.8.0'
+    implementation 'com.hyphenate:ease-call-kit:3.8.0.1'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 }
