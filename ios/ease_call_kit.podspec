@@ -22,4 +22,6 @@ A new flutter plugin project.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.dependency 'EaseCallKit', '3.8.0.2'
   s.dependency 'AgoraRtcEngine_iOS', '3.3.0'
+  s.dependency 'Masonry'
+  s.dependency 'SDWebImage'
 end

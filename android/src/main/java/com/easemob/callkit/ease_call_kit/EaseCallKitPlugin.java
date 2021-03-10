@@ -21,9 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-
 import androidx.annotation.NonNull;
-
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
@@ -52,25 +50,19 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
 
-
-    JSONObject param = new JSONObject((Map)call.arguments);
+    JSONObject param = new JSONObject((Map) call.arguments);
     try {
       if (call.method.equals("initCallKit")) {
         initWithConfig(param, result);
-      }
-      else if(call.method.equals("startSingleCall")){
+      } else if (call.method.equals("startSingleCall")) {
         startSingleCall(param, result);
-      }
-      else if(call.method.equals("startInviteUsers")){
+      } else if (call.method.equals("startInviteUsers")) {
         startInviteUsers(param, result);
-      }
-      else if(call.method.equals("getEaseCallConfig")){
+      } else if (call.method.equals("getEaseCallConfig")) {
         getEaseCallConfig(param, result);
-      }
-      else if(call.method.equals("setRTCToken")){
+      } else if (call.method.equals("setRTCToken")) {
         setRTCToken(param, result);
-      }
-      else {
+      } else {
         result.notImplemented();
       }
     } catch (JSONException e) {
@@ -85,12 +77,13 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     result.success(data);
   }
 
-  private void startSingleCall(JSONObject map, Result result) throws JSONException{
+  private void startSingleCall(JSONObject map, Result result) throws JSONException {
     int callType = map.getInt("call_type");
     String user = map.getString("em_id");
     Map ext = JsonObjectToHashMap(map.getJSONObject("ext"));
 
-    EaseCallKit.getInstance().startSingleCall(callType == 0 ? EaseCallType.SINGLE_VOICE_CALL: EaseCallType.SINGLE_VIDEO_CALL, user, ext);
+    EaseCallKit.getInstance()
+        .startSingleCall(callType == 0 ? EaseCallType.SINGLE_VOICE_CALL : EaseCallType.SINGLE_VIDEO_CALL, user, ext);
     this.result = result;
   }
 
@@ -98,7 +91,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     JSONArray usersArray = map.getJSONArray("users");
     String[] users = new String[usersArray.length()];
     for (int i = 0; i < usersArray.length(); i++) {
-      users[i] = (String)usersArray.get(i);
+      users[i] = (String) usersArray.get(i);
     }
     Map ext = JsonObjectToHashMap(map.getJSONObject("ext"));
     EaseCallKit.getInstance().startInviteMultipleCall(users, ext);
@@ -117,10 +110,10 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     }
   }
 
-  private void addCallKitListener(){
+  private void addCallKitListener() {
     callKitListener = new EaseCallKitListener() {
       @Override
-      public void onInviteUsers(Context context,String userId[],JSONObject ext) {
+      public void onInviteUsers(Context context, String userId[], JSONObject ext) {
         Map<String, Object> data = new HashMap<>();
         data.put("exclude_users", userId);
         data.put("ext", ext);
@@ -128,7 +121,8 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
       }
 
       @Override
-      public void onEndCallWithReason(EaseCallType callType, String channelName, EaseCallEndReason reason, long callTime) {
+      public void onEndCallWithReason(EaseCallType callType, String channelName, EaseCallEndReason reason,
+          long callTime) {
         Map<String, Object> data = new HashMap<>();
         data.put("channel_name", channelName);
         data.put("time", callTime);
@@ -138,7 +132,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
       }
 
       @Override
-      public void onGenerateToken(String userId, String channelName, String appKey, EaseCallKitTokenCallback callback){
+      public void onGenerateToken(String userId, String channelName, String appKey, EaseCallKitTokenCallback callback) {
         weakCallback = new WeakReference<>(callback);
         Map<String, Object> data = new HashMap<>();
         data.put("app_id", appKey);
@@ -148,7 +142,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
       }
 
       @Override
-      public void onReceivedCall(EaseCallType callType, String fromUserId,JSONObject ext) {
+      public void onReceivedCall(EaseCallType callType, String fromUserId, JSONObject ext) {
         Map<String, Object> data = new HashMap<>();
         data.put("call_type", callTypeToInt(callType));
         data.put("inviter", fromUserId);
@@ -157,8 +151,9 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
         }
         channel.invokeMethod("callDidReceive", data);
       }
+
       @Override
-      public  void onCallError(EaseCallKit.EaseCallError type, int errorCode, String description){
+      public void onCallError(EaseCallKit.EaseCallError type, int errorCode, String description) {
         Map<String, Object> data = new HashMap<>();
         int intType = 0;
         if (type == EaseCallKit.EaseCallError.PROCESS_ERROR) {
@@ -175,7 +170,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
       }
 
       @Override
-      public void onInViteCallMessageSent(){
+      public void onInViteCallMessageSent() {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
           @Override
@@ -195,7 +190,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   private static HashMap<String, Object> JsonObjectToHashMap(JSONObject data) throws JSONException {
     HashMap<String, Object> map = new HashMap();
     Iterator iterator = data.keys();
-    while (iterator.hasNext()){
+    while (iterator.hasNext()) {
       String key = iterator.next().toString();
       Object result = data.get(key);
       if (result.getClass().getSimpleName().equals("Integer")) {
@@ -219,7 +214,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     EaseCallKitConfig config = new EaseCallKitConfig();
     config.setAgoraAppId(map.getString("agora_app_id"));
     String headImageStr = map.getString("default_head_image_url");
-    if (headImageStr.length() > 0){
+    if (headImageStr.length() > 0) {
       config.setDefaultHeadImage(headImageStr);
     }
 
@@ -234,9 +229,9 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
 
     this.enableRTCTokenValidate = map.getBoolean("enable_rtc_token_validate");
     Map<String, EaseCallUserInfo> userMap = new HashMap<>();
-    if (map.has("user_map")){
-      JSONArray usersList =  map.getJSONArray("user_map");
-      for (int i = 0; i < usersList.length() ; i++) {
+    if (map.has("user_map")) {
+      JSONArray usersList = map.getJSONArray("user_map");
+      for (int i = 0; i < usersList.length(); i++) {
         JSONObject userObject = (JSONObject) usersList.get(i);
         EaseCallUserInfo userInfo = userInfoFromJson(userObject.getJSONObject("value"));
         userMap.put(userObject.getString("key"), userInfo);
@@ -247,23 +242,25 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     return config;
   }
 
-
-  private  EaseCallUserInfo userInfoFromJson(JSONObject map) throws  JSONException {
+  private EaseCallUserInfo userInfoFromJson(JSONObject map) throws JSONException {
     String name = map.getString("nickname");
-    String headImage = map.getString("avatar_url");
-    EaseCallUserInfo userInfo = new EaseCallUserInfo(name, headImage);
+    String headImage = null;
+    if (map.get("avatar_url") != null) {
+      headImage = map.getString("avatar_url");
+    }
+
+    EaseCallUserInfo userInfo = new EaseCallUserInfo(name, null);
 
     return userInfo;
   }
-
 
   private int callTypeToInt(EaseCallType type) {
     int intType = 1;
     if (type == EaseCallType.SINGLE_VOICE_CALL) {
       intType = 1;
-    } else if(type == EaseCallType.SINGLE_VIDEO_CALL) {
+    } else if (type == EaseCallType.SINGLE_VIDEO_CALL) {
       intType = 2;
-    } else  {
+    } else {
       intType = 3;
     }
     return intType;
@@ -272,32 +269,32 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   private int reasonToInt(EaseCallEndReason reason) {
     int intReason = 0;
     switch (reason) {
-      case EaseCallEndReasonHangup:
-        intReason = 1;
-        break;
-      case EaseCallEndReasonCancel:
-        intReason = 2;
-        break;
-      case EaseCallEndReasonRemoteCancel:
-        intReason = 3;
-        break;
-      case EaseCallEndReasonRefuse:
-        intReason = 4;
-        break;
-      case EaseCallEndReasonBusy:
-        intReason = 5;
-        break;
-      case EaseCallEndReasonNoResponse:
-        intReason = 6;
-        break;
-      case EaseCallEndReasonRemoteNoResponse:
-        intReason = 7;
-        break;
-      case EaseCallEndReasonHandleOnOtherDevice:
-        intReason = 8;
-        break;
-      default:
-        break;
+    case EaseCallEndReasonHangup:
+      intReason = 1;
+      break;
+    case EaseCallEndReasonCancel:
+      intReason = 2;
+      break;
+    case EaseCallEndReasonRemoteCancel:
+      intReason = 3;
+      break;
+    case EaseCallEndReasonRefuse:
+      intReason = 4;
+      break;
+    case EaseCallEndReasonBusy:
+      intReason = 5;
+      break;
+    case EaseCallEndReasonNoResponse:
+      intReason = 6;
+      break;
+    case EaseCallEndReasonRemoteNoResponse:
+      intReason = 7;
+      break;
+    case EaseCallEndReasonHandleOnOtherDevice:
+      intReason = 8;
+      break;
+    default:
+      break;
     }
     return intReason;
   }
@@ -307,5 +304,3 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     channel.setMethodCallHandler(null);
   }
 }
-
-

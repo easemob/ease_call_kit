@@ -258,7 +258,11 @@ dispatch_async(dispatch_get_main_queue(), block);\
         config.callTimeOut = [dict[@"call_timeout"] intValue];
     }
     
-    config.ringFileUrl = dict[@"ring_file_url"];
+    NSString *ringFileURL = dict[@"ring_file_url"];
+    if (ringFileURL.length > 0) {
+        config.ringFileUrl = ringFileURL;
+    }
+    
     config.enableRTCTokenValidate = [dict[@"enable_rtc_token_validate"] boolValue];
     
     NSMutableDictionary *usersDict = [NSMutableDictionary dictionary];
