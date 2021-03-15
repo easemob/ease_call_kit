@@ -82,8 +82,6 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
     EaseCallKit.dispose();
     super.dispose();
   }
-} 
-
 
   @override
   /// 通话结束时触发该回调
@@ -109,6 +107,8 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
   /// 多人通话中，点击邀请按钮触发该回调
   void multiCallDidInviting(List<String> excludeUsers, Map ext) {
   }
+  
+} 
 ```
 
 ## iOS需要配置
