@@ -12,6 +12,7 @@
 
 [环信Android EaseCallKit集成文档](http://docs-im.easemob.com/im/android/other/easecallkit)
 
+[im flutter sdk](https://github.com/easemob/im_flutter_sdk):环信im flutter plugin,example中使用了ease call kit。
 
 ### 前期准备
 
