@@ -115,7 +115,18 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
 
 [环信iOS EaseCallKit集成文档](http://docs-im.easemob.com/im/ios/other/easecallkit)
 
+### 修改Podfile文件
+
 iOS EaseCallKit 需要配置`use_frameworks!`，所以您项目中的`Podfile`文件中需要添加`use_frameworks!`
+
+### 添加权限
+
+应用需要音频设备及摄像头权限，在 info.plist 文件中，点击 + 图标，添加如下信息
+
+Key | Type | Value
+--- | --- | ---
+Privacy - Microphone Usage Description| String | 描述信息，如“环信需要使用您的麦克风”
+Privacy - Camera Usage Description | String | 描述信息，如“环信需要使用您的摄像头”
 
 
 ## Android需要配置
