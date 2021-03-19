@@ -123,10 +123,10 @@ iOS EaseCallKit 需要配置`use_frameworks!`，所以您项目中的`Podfile`�
 
 应用需要音频设备及摄像头权限，在 info.plist 文件中，点击 + 图标，添加如下信息
 
-Key | Type | Value
---- | --- | ---
-Privacy - Microphone Usage Description| String | 描述信息，如“环信需要使用您的麦克风”
-Privacy - Camera Usage Description | String | 描述信息，如“环信需要使用您的摄像头”
+| Key                                    | Type   | Value                                |
+| -------------------------------------- | ------ | ------------------------------------ |
+| Privacy - Microphone Usage Description | String | 描述信息，如“环信需要使用您的麦克风” |
+| Privacy - Camera Usage Description     | String | 描述信息，如“环信需要使用您的摄像头” |
 
 
 ## Android需要配置
@@ -154,18 +154,18 @@ Privacy - Camera Usage Description | String | 描述信息，如“环信需要�
 ### 添加CallkitActivity
 
 ```
-<activity
-    android:name="easemob.hyphenate.calluikit.ui.EaseVideoCallActivity"
-    android:configChanges="orientation|keyboardHidden|screenSize"
-    android:excludeFromRecents="true"
-    android:launchMode="singleInstance"
-    android:screenOrientation="portrait"/>
-<activity
-    android:name="easemob.hyphenate.calluikit.ui.EaseMultipleVideoActivity"
-    android:configChanges="orientation|keyboardHidden|screenSize"
-    android:excludeFromRecents="true"
-    android:launchMode="singleInstance"
-    android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.hyphenate.easecallkit.ui.EaseVideoCallActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.hyphenate.easecallkit.ui.EaseMultipleVideoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"/>
 ```
 > activity中没有默认theme，如果您的项目中没有配置默认theme，需要您为application添加默认theme
 
