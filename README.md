@@ -29,8 +29,8 @@
 dependencies:
   im_flutter_sdk:  
     git:  
-      url: https://github.com/dujiepeng/ease_call_kit.git 
-      ref: main
+      url: https://github.com/easemob/ease_call_kit.git 
+      ref: stable
 ```
 
 
