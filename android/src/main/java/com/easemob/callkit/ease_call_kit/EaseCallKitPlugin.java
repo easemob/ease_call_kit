@@ -146,7 +146,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
         Map<String, Object> data = new HashMap<>();
         data.put("call_type", callTypeToInt(callType));
         data.put("inviter", fromUserId);
-        if (ext != null) {
+        if (ext != null && ext.length() > 0) {
           data.put("ext", ext);
         }
         channel.invokeMethod("callDidReceive", data);
