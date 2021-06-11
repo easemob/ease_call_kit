@@ -66,7 +66,6 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
                     EaseCallKit.startInviteUsers([
                       'liu002',
                       'liu003',
-                      'liu004',
                     ]);
                   },
                 ),

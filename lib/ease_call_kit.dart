@@ -82,6 +82,8 @@ class EaseCallKit {
     req['call_type'] = callType == EaseCallType.SingeAudio ? 0 : 1;
     req['ext'] = ext ?? {};
     Map result = await _channel.invokeMethod('startSingleCall', req);
+    print('startSingleCall   result:$result');
+
     String callId;
     if (result['error'] != null) {
       throw (EaseCallError.fromJson(result['error']));

@@ -10,6 +10,8 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 #define kGetRTCTokenURL @"http://a1-hsb.easemob.com/token/rtcToken?"
 #define kSetChannelMapperURL  @"http://a1-hsb.easemob.com/channel/mapper?"
+#define EASEMOB_APP_KEY @"easemob-demo#easeim"
+
 
 @interface EaseCallKitPlugin()<EaseCallDelegate>
 @property (nonatomic, strong) FlutterMethodChannel* channel;
@@ -46,16 +48,54 @@ dispatch_async(dispatch_get_main_queue(), block);\
 }
 
 - (void)initCallKit:(NSDictionary *)dict result:(FlutterResult)result{
-    EaseCallConfig *config = [EaseCallConfig fromJson:dict];
-    [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
-    result(@{});
+    NSLog(@"%s dict:%@\n",__func__,dict);
+    
+    if ([EMClient sharedClient].isLoggedIn) {
+        EaseCallConfig *config = [EaseCallConfig fromJson:dict];
+        [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
+        result(@{});
+        ease_call_dispatch_main_async_safe(^(){
+            result(@{});
+        });
+        
+    }else {
+      
+        [self initHypheanteSDK];
+        
+        NSString *userName = @"liu001";
+        NSString *password = @"12345678";
+
+        [EMClient.sharedClient loginWithUsername:userName
+                                           password:password
+                                         completion:^(NSString *aUsername, EMError *aError) {
+            
+            NSLog(@"aUsername:%@ aError:%@",aUsername,aError);
+            NSLog(@"%s userName:%@\n acctoken:%@\n option.key:%@\n",__func__,[EMClient sharedClient].currentUsername,[EMClient sharedClient].accessUserToken,[EMClient sharedClient].options.appkey);
+            
+            EaseCallConfig *config = [EaseCallConfig fromJson:dict];
+            [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
+            result(@{});
+            ease_call_dispatch_main_async_safe(^(){
+                result(@{});
+            });
+            
+        }];
+        
+    }
+    
+
+//    EaseCallConfig *config = [EaseCallConfig fromJson:dict];
+//    [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
+//    result(@{});
 }
 
 - (void)startSingleCall:(NSDictionary *)dict result:(FlutterResult)result{
+    
     EaseCallType type = [dict[@"call_type"] intValue] == 0 ? EaseCallType1v1Audio : EaseCallType1v1Video;
     NSString *emId = dict[@"em_id"];
     NSDictionary *ext = dict[@"ext"];
-    NSLog(@"%s dict:%@",__func__,dict);
+    
+    NSLog(@"%s dict:%@\n",__func__,dict);
 
     [[EaseCallManager sharedManager] startSingleCallWithUId:emId
                                                        type:type
@@ -105,24 +145,17 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 
 - (void)setRTCTokenWithAppId:(NSString * _Nonnull)aAppId channelName:(NSString * _Nonnull)aChannelName account:(NSString * _Nonnull)aUserAccount uid:(NSInteger)aAgoraUid {
-    NSLog(@"%s  \naAppId:%@ \naChannelName:%@ \naUserAccount:%@  \naAgoraUid:%@",__func__,aAppId,aChannelName,aUserAccount,@(aAgoraUid));
+    NSLog(@"%s\n aAppId:%@\n aChannelName:%@\n aUserAccount:%@\n aAgoraUid:%@\n",__func__,aAppId,aChannelName,aUserAccount,@(aAgoraUid));
 
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config
                                                           delegate:nil
                                                      delegateQueue:[NSOperationQueue mainQueue]];
-//    NSString* strUrl = [NSString stringWithFormat:@"%@userAccount=%@&channelName=%@&appkey=%@&agoraUserId=%@",kGetRTCTokenURL,aUserAccount,aChannelName,[EMClient sharedClient].options.appkey,aAppId];
     
-//userName:liu002
-//apppkey:easemob-demo#easeim
-    
-    NSString* strUrl = [NSString stringWithFormat:@"http://a1.easemob.com/token/rtcToken/v1?userAccount=%@&channelName=%@&appkey=%@",@"liu002",aChannelName,@"easemob-demo#easeim"];
-
-    
-//    NSString* strUrl = [NSString stringWithFormat:@"http://a1.easemob.com/token/rtcToken/v1?userAccount=%@&channelName=%@&appkey=%@",[EMClient sharedClient].currentUsername,aChannelName,[EMClient sharedClient].options.appkey];
-
-
     NSLog(@"%s\n userName:%@\n apppkey:%@\n [EMClient sharedClient].accessUserToken:%@\n",__func__,[EMClient sharedClient].currentUsername,[EMClient sharedClient].options.appkey,[EMClient sharedClient].accessUserToken);
+    
+
+    NSString* strUrl = [NSString stringWithFormat:@"http://a1.easemob.com/token/rtcToken/v1?userAccount=%@&channelName=%@&appkey=%@",[EMClient sharedClient].currentUsername,aChannelName,[EMClient sharedClient].options.appkey];
 
     NSString*utf8Url = [strUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLFragmentAllowedCharacterSet]];
     NSURL* url = [NSURL URLWithString:utf8Url];
@@ -182,14 +215,14 @@ dispatch_async(dispatch_get_main_queue(), block);\
                         [users setObject:username forKey:uId];
                     }
                     [[EaseCallManager sharedManager] setUsers:users channelName:channelName];
-                    EaseCallUser* user = [[EaseCallUser alloc] init];
-                    user.nickName = @"我的昵称";
-                    user.headImage = [NSURL URLWithString:@"https://download-sdk.oss-cn-beijing.aliyuncs.com/downloads/IMDemo/avatar/Image1.png"];
-                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:@"lxm" info:user];
-                    EaseCallUser* user2 = [[EaseCallUser alloc] init];
-                    user2.nickName = @"lxm9的昵称";
-                    user2.headImage = [NSURL URLWithString:@"https://download-sdk.oss-cn-beijing.aliyuncs.com/downloads/IMDemo/avatar/Image2.png"];
-                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:@"lxm9" info:user2];
+//                    EaseCallUser* user = [[EaseCallUser alloc] init];
+//                    user.nickName = @"我的昵称";
+//                    user.headImage = [NSURL URLWithString:@"https://download-sdk.oss-cn-beijing.aliyuncs.com/downloads/IMDemo/avatar/Image1.png"];
+//                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:@"lxm" info:user];
+//                    EaseCallUser* user2 = [[EaseCallUser alloc] init];
+//                    user2.nickName = @"lxm9的昵称";
+//                    user2.headImage = [NSURL URLWithString:@"https://download-sdk.oss-cn-beijing.aliyuncs.com/downloads/IMDemo/avatar/Image2.png"];
+//                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:@"lxm9" info:user2];
                 }
             }
         }
@@ -227,7 +260,8 @@ dispatch_async(dispatch_get_main_queue(), block);\
     arg[@"call_type"] = @([self callTypeToInt:aType]);
     arg[@"inviter"] = user;
     arg[@"ext"] = aExt;
-    
+    NSLog(@"%s aType:%@ user:%@ aExt:%@",__func__,@(aType),user,aExt);
+        
     [self.channel invokeMethod:@"callDidReceive" arguments:arg];
 }
  
@@ -252,20 +286,27 @@ dispatch_async(dispatch_get_main_queue(), block);\
                            channelName:(NSString * _Nonnull)aChannelName
                                account:(NSString * _Nonnull)aUserAccount
                                    uid:(NSInteger)aAgoraUid {
-    NSLog(@"%s  \naAppId:%@ \naChannelName:%@ \naUserAccount:%@  \naAgoraUid:%@",__func__,aAppId,aChannelName,aUserAccount,@(aAgoraUid));
+    NSLog(@"%s aAppId:%@\n aChannelName:%@\n aUserAccount:%@\n  aAgoraUid:%@\n",__func__,aAppId,aChannelName,aUserAccount,@(aAgoraUid));
     [self setRTCTokenWithAppId:aAppId channelName:aChannelName account:aUserAccount uid:aAgoraUid];
 }
 
 
 - (void)remoteUserDidJoinChannel:(NSString * _Nonnull)aChannelName uid:(NSInteger)aUid username:(NSString * _Nullable)aUserName {
-    NSLog(@"%s  aChannelName:%@ aUid:%@  aUserName:%@",__func__,aChannelName,@(aUid),aUserName);
+    NSLog(@"%s  aChannelName:%@\n aUid:%@\n  aUserName:%@\n",__func__,aChannelName,@(aUid),aUserName);
+    
+    [self setRTCTokenWithAppId:@"" channelName:aChannelName account:aUserName uid:aUid];
+    
+    
     if(aUserName.length > 0) {
-//        EMUserInfo* userInfo = [[UserInfoStore sharedInstance] getUserInfoById:aUserName];
         [[EMClient sharedClient].userInfoManager fetchUserInfoById:@[aUserName] completion:^(NSDictionary *aUserDatas, EMError *aError) {
             EMUserInfo* info = aUserDatas[aUserName];
             if(info && (info.avatarUrl.length > 0 || info.nickName > 0)) {
                 EaseCallUser* user = [EaseCallUser userWithNickName:info.nickName image:[NSURL URLWithString:info.avatarUrl]];
-                [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:aUserName info:user];
+                
+                ease_call_dispatch_main_async_safe(^(){
+                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:aUserName info:user];
+                });
+                
             }
         }];
     
@@ -290,7 +331,8 @@ dispatch_async(dispatch_get_main_queue(), block);\
     NSURLSessionDataTask *task = [session dataTaskWithRequest:urlReq completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if(data) {
             NSDictionary* body = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
-            NSLog(@"mapperBody:%@",body);
+            NSLog(@"%s mapperBody:%@",__func__,body);
+            
             if(body) {
                 NSString* resCode = [body objectForKey:@"code"];
                 if([resCode isEqualToString:@"RES_0K"]) {
@@ -301,16 +343,17 @@ dispatch_async(dispatch_get_main_queue(), block);\
                         NSString* username = [result objectForKey:strId];
                         NSNumber* uId = [NSNumber numberWithInteger:[strId integerValue]];
                         [users setObject:username forKey:uId];
-//                        EMUserInfo* info = [[UserInfoStore sharedInstance] getUserInfoById:username];
                         [[EMClient sharedClient].userInfoManager fetchUserInfoById:@[username] completion:^(NSDictionary *aUserDatas, EMError *aError) {
                             EMUserInfo* info = aUserDatas[username];
                             if(info && (info.avatarUrl.length > 0 || info.nickName > 0)) {
                                 EaseCallUser* user = [EaseCallUser userWithNickName:info.nickName image:[NSURL URLWithString:info.avatarUrl]];
-                                [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:username info:user];
+                                
+                                ease_call_dispatch_main_async_safe(^(){
+                                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:username info:user];
+                                });
+                                
                             }
                         }];
-                        
-                       
                     }
                     [[EaseCallManager sharedManager] setUsers:users channelName:channelName];
                 }
@@ -321,9 +364,45 @@ dispatch_async(dispatch_get_main_queue(), block);\
     [task resume];
 }
 
+#warning temp for test
+- (void)initHypheanteSDK {
+    EMOptions *options = [EMOptions optionsWithAppkey:EASEMOB_APP_KEY];
+    options.enableConsoleLog = YES;
+    // 为了方便演示，设置自动同意好友申请。
+    options.isAutoAcceptFriendInvitation = YES;
+    [EMClient.sharedClient initializeSDKWithOptions:options];
+}
+
+
+//- (void)initOptionAndLogin {
+//    if ([EMClient sharedClient].isLoggedIn) {
+//        return;
+//    }
+//    [self initHypheanteSDK];
+//    [self login];
+//}
+//
+//
+//- (void)login {
+//    NSString *userName = @"liu001";
+//    NSString *password = @"12345678";
+//
+//    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+//    [EMClient.sharedClient loginWithUsername:userName
+//                                       password:password
+//                                     completion:^(NSString *aUsername, EMError *aError) {
+//
+//        NSLog(@"aUsername:%@ aError:%@",aError,aUsername);
+//        dispatch_semaphore_signal(sema);
+//        NSLog(@"%s userName:%@ acctoken:%@",__func__,[EMClient sharedClient].currentUsername,[EMClient sharedClient].accessUserToken);
+//    }];
+//    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+//
+//}
 
 
 #pragma mark private method
+
 - (int)callTypeToInt:(EaseCallType)aType {
     int type = 0;
     switch (aType) {
@@ -487,6 +566,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
     ret[@"nickname"] = self.nickName;
     return ret;
 }
+
 @end
 
 #undef kGetRTCTokenURL
