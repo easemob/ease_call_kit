@@ -9,6 +9,15 @@
 /* Begin PBXBuildFile section */
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		7FF17ACD2672226A00F6AEEB /* LaunchImage@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7FF17ACA2672226A00F6AEEB /* LaunchImage@2x.png */; };
+		7FF17ACE2672226A00F6AEEB /* LaunchImage@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7FF17ACB2672226A00F6AEEB /* LaunchImage@3x.png */; };
+		7FF17ACF2672226A00F6AEEB /* LaunchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = 7FF17ACC2672226A00F6AEEB /* LaunchImage.png */; };
+		7FF17ADF2672227700F6AEEB /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF17AD32672227700F6AEEB /* SettingsViewController.m */; };
+		7FF17AE02672227700F6AEEB /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF17AD42672227700F6AEEB /* HomeViewController.m */; };
+		7FF17AE12672227700F6AEEB /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF17AD52672227700F6AEEB /* LoginViewController.m */; };
+		7FF17AE22672227700F6AEEB /* LaunchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF17AD62672227700F6AEEB /* LaunchViewController.m */; };
+		7FF17AE32672227700F6AEEB /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF17AD72672227700F6AEEB /* ContactsViewController.m */; };
+		7FF17AE42672227700F6AEEB /* UIStoryboard+Category.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF17ADE2672227700F6AEEB /* UIStoryboard+Category.m */; };
 		978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */; };
 		97C146F31CF9000F007C117D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C146F21CF9000F007C117D /* main.m */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
@@ -39,6 +48,21 @@
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		7AFFD8ED1D35381100E5BB4D /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		7FF17ACA2672226A00F6AEEB /* LaunchImage@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LaunchImage@2x.png"; sourceTree = "<group>"; };
+		7FF17ACB2672226A00F6AEEB /* LaunchImage@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "LaunchImage@3x.png"; sourceTree = "<group>"; };
+		7FF17ACC2672226A00F6AEEB /* LaunchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = LaunchImage.png; sourceTree = "<group>"; };
+		7FF17AD22672227700F6AEEB /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
+		7FF17AD32672227700F6AEEB /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
+		7FF17AD42672227700F6AEEB /* HomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
+		7FF17AD52672227700F6AEEB /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
+		7FF17AD62672227700F6AEEB /* LaunchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LaunchViewController.m; sourceTree = "<group>"; };
+		7FF17AD72672227700F6AEEB /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
+		7FF17AD82672227700F6AEEB /* HomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomeViewController.h; sourceTree = "<group>"; };
+		7FF17AD92672227700F6AEEB /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
+		7FF17ADA2672227700F6AEEB /* LaunchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LaunchViewController.h; sourceTree = "<group>"; };
+		7FF17ADB2672227700F6AEEB /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
+		7FF17ADD2672227700F6AEEB /* UIStoryboard+Category.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIStoryboard+Category.h"; sourceTree = "<group>"; };
+		7FF17ADE2672227700F6AEEB /* UIStoryboard+Category.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIStoryboard+Category.m"; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -71,6 +95,51 @@
 				B813D47A339B917DEA65512B /* Pods-Runner.profile.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		7FF17AC92672226A00F6AEEB /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				7FF17ACA2672226A00F6AEEB /* LaunchImage@2x.png */,
+				7FF17ACB2672226A00F6AEEB /* LaunchImage@3x.png */,
+				7FF17ACC2672226A00F6AEEB /* LaunchImage.png */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		7FF17AD02672227700F6AEEB /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				7FF17AD12672227700F6AEEB /* ViewControllers */,
+				7FF17ADC2672227700F6AEEB /* Categorys */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		7FF17AD12672227700F6AEEB /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				7FF17AD22672227700F6AEEB /* ContactsViewController.h */,
+				7FF17AD72672227700F6AEEB /* ContactsViewController.m */,
+				7FF17AD82672227700F6AEEB /* HomeViewController.h */,
+				7FF17AD42672227700F6AEEB /* HomeViewController.m */,
+				7FF17ADA2672227700F6AEEB /* LaunchViewController.h */,
+				7FF17AD62672227700F6AEEB /* LaunchViewController.m */,
+				7FF17ADB2672227700F6AEEB /* LoginViewController.h */,
+				7FF17AD52672227700F6AEEB /* LoginViewController.m */,
+				7FF17AD92672227700F6AEEB /* SettingsViewController.h */,
+				7FF17AD32672227700F6AEEB /* SettingsViewController.m */,
+			);
+			path = ViewControllers;
+			sourceTree = "<group>";
+		};
+		7FF17ADC2672227700F6AEEB /* Categorys */ = {
+			isa = PBXGroup;
+			children = (
+				7FF17ADD2672227700F6AEEB /* UIStoryboard+Category.h */,
+				7FF17ADE2672227700F6AEEB /* UIStoryboard+Category.m */,
+			);
+			path = Categorys;
 			sourceTree = "<group>";
 		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
@@ -106,6 +175,8 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				7FF17AC92672226A00F6AEEB /* Resources */,
+				7FF17AD02672227700F6AEEB /* Classes */,
 				7AFFD8ED1D35381100E5BB4D /* AppDelegate.h */,
 				7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
@@ -200,7 +271,10 @@
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
+				7FF17ACF2672226A00F6AEEB /* LaunchImage.png in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				7FF17ACE2672226A00F6AEEB /* LaunchImage@3x.png in Resources */,
+				7FF17ACD2672226A00F6AEEB /* LaunchImage@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,9 +355,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7FF17AE42672227700F6AEEB /* UIStoryboard+Category.m in Sources */,
 				978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */,
+				7FF17AE32672227700F6AEEB /* ContactsViewController.m in Sources */,
 				97C146F31CF9000F007C117D /* main.m in Sources */,
+				7FF17AE12672227700F6AEEB /* LoginViewController.m in Sources */,
+				7FF17AE22672227700F6AEEB /* LaunchViewController.m in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				7FF17AE02672227700F6AEEB /* HomeViewController.m in Sources */,
+				7FF17ADF2672227700F6AEEB /* SettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,12 +445,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 499WYUV8Q2;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -496,12 +578,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 499WYUV8Q2;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -522,12 +606,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 499WYUV8Q2;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

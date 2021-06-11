@@ -23,6 +23,7 @@ import java.util.Map;
 
 import androidx.annotation.NonNull;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -62,7 +63,11 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
         getEaseCallConfig(param, result);
       } else if (call.method.equals("setRTCToken")) {
         setRTCToken(param, result);
-      } else {
+      } else if (call.method.equals(EaseCallKitSDKMethod.ECMethodKeyGetRTCToken)) {
+        setRTCToken(param, result);
+      }else if (call.method.equals(EaseCallKitSDKMethod.ECMethodKeyGetChannelMapper)) {
+        setRTCToken(param, result);
+      }else {
         result.notImplemented();
       }
     } catch (JSONException e) {
@@ -108,6 +113,21 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     if (this.weakCallback.get() != null) {
       this.weakCallback.get().onSetToken(rtcToken);
     }
+  }
+
+//  req['username'] = username;
+//  req['password'] = password;
+//  req['channelName'] = channelName;
+//  req['agoraUserId'] = agoraUserId;
+//  req['appkey'] = appkey;
+
+  private void getRTCToken(JSONObject map, Result result) throws JSONException {
+    String username = map.getString("username");
+    String password = map.getString("password");
+    String channelName = map.getString("channelName");
+    String agoraUserId = map.getString("agoraUserId");
+    String appkey = map.getString("appkey");
+    Log.v("getRTCToken", "userName=" + username +"password"+password +"channelName"+channelName+"agoraUserId"+agoraUserId);
   }
 
   private void addCallKitListener() {

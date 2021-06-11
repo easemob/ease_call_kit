@@ -3,6 +3,8 @@ package com.easemob.callkit.ease_call_kit_example;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+
+import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivity;
 
 import com.hyphenate.EMCallBack;
@@ -19,7 +21,7 @@ public class MainActivity extends FlutterActivity {
         EMClient.getInstance().login("du001", "1", new EMCallBack() {
             @Override
             public void onSuccess() {
-
+                Log.v("getCurrentUser", "EMClient.getInstance().getCurrentUser() = "+EMClient.getInstance().getCurrentUser());
             }
 
             @Override

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/services.dart';
 
@@ -117,6 +118,37 @@ class EaseCallKit {
     req['rtc_token'] = token;
     req['channel_name'] = channelName;
     await _channel.invokeMethod('setRTCToken', req);
+  }
+
+//  "username":"zjptest",
+//     "password":"1",
+//     "channelName":"123",
+//     "agoraUserId":123123,
+//     "appkey":"easemob-demo#chatdemoui"
+  //获取声网token
+  static Future<Map> getRTCToken(String channelName, String agoraUserId) async {
+    Map req = HashMap();
+    req['channelName'] = channelName;
+    req['agoraUserId'] = agoraUserId;
+    print('getRTCToken ====== req: $req');
+    Map result = await _channel.invokeMethod('getRTCToken', req);
+    print('result $result');
+    return result;
+  }
+
+// channelName	string	要获取声网频道的名称
+// userAccount	string	用户名（环信的用户名）
+// appkey	string	环信的appkey
+
+  // 根据channel名称获取详情
+  static Future<Map> getChannelMapper(
+      String channelName, String userAccount, String appkey) async {
+    Map req = HashMap();
+    req['userAccount'] = userAccount;
+    req['channelName'] = channelName;
+    req['appkey'] = appkey;
+    Map result = await _channel.invokeMethod('getChannelMapper', req);
+    return result;
   }
 
   static set listener(listener) {
