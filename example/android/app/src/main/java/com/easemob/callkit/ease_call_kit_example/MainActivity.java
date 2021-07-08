@@ -16,9 +16,11 @@ public class MainActivity extends FlutterActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EMOptions emOptions = new EMOptions();
-        emOptions.setAppKey("easemob-demo#chatdemoui");
+//        emOptions.setAppKey("easemob-demo#chatdemoui");
+        emOptions.setAppKey("easemob-demo#easeim");
+
         EMClient.getInstance().init(this.getApplicationContext(), emOptions);
-        EMClient.getInstance().login("du001", "1", new EMCallBack() {
+        EMClient.getInstance().login("liu001", "12345678", new EMCallBack() {
             @Override
             public void onSuccess() {
                 Log.v("getCurrentUser", "EMClient.getInstance().getCurrentUser() = "+EMClient.getInstance().getCurrentUser());

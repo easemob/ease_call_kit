@@ -8,8 +8,6 @@ block();\
 dispatch_async(dispatch_get_main_queue(), block);\
 }
 
-#define kGetRTCTokenURL @"http://a1-hsb.easemob.com/token/rtcToken?"
-#define kSetChannelMapperURL  @"http://a1-hsb.easemob.com/channel/mapper?"
 #define EASEMOB_APP_KEY @"easemob-demo#easeim"
 
 
@@ -39,10 +37,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
         [self getEaseCallConfig:call.arguments result:result];
     } else if ([@"setRTCToken" isEqualToString:call.method]) {
         [self setRTCToken:call.arguments result:result];
-    }else  if ([ECMethodKeyGetChannelMapper isEqualToString:call.method]) {
-        [self getChannelMapper:call.arguments result:result];
-    }
-    else {
+    }else {
         result(FlutterMethodNotImplemented);
     }
 }
@@ -68,10 +63,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
         [EMClient.sharedClient loginWithUsername:userName
                                            password:password
                                          completion:^(NSString *aUsername, EMError *aError) {
-            
-            NSLog(@"aUsername:%@ aError:%@",aUsername,aError);
-            NSLog(@"%s userName:%@\n acctoken:%@\n option.key:%@\n",__func__,[EMClient sharedClient].currentUsername,[EMClient sharedClient].accessUserToken,[EMClient sharedClient].options.appkey);
-            
+                        
             EaseCallConfig *config = [EaseCallConfig fromJson:dict];
             [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
             result(@{});
@@ -139,7 +131,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 #warning this is to be confirmed 
 - (void)setRTCToken:(NSDictionary *)dict result:(FlutterResult)result{
-    [[EaseCallManager sharedManager] setRTCToken:dict[@"rtc_token"] channelName:dict[@"channel_name"] uid:1118210518231124];
+    [[EaseCallManager sharedManager] setRTCToken:dict[@"rtc_token"] channelName:dict[@"channel_name"] uid:2897815636];
 }
 
 
@@ -151,8 +143,6 @@ dispatch_async(dispatch_get_main_queue(), block);\
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config
                                                           delegate:nil
                                                      delegateQueue:[NSOperationQueue mainQueue]];
-    
-    NSLog(@"%s\n userName:%@\n apppkey:%@\n [EMClient sharedClient].accessUserToken:%@\n",__func__,[EMClient sharedClient].currentUsername,[EMClient sharedClient].options.appkey,[EMClient sharedClient].accessUserToken);
     
 
     NSString* strUrl = [NSString stringWithFormat:@"http://a1.easemob.com/token/rtcToken/v1?userAccount=%@&channelName=%@&appkey=%@",[EMClient sharedClient].currentUsername,aChannelName,[EMClient sharedClient].options.appkey];
@@ -184,52 +174,6 @@ dispatch_async(dispatch_get_main_queue(), block);\
     
 }
 
-- (void)getChannelMapper:(NSDictionary *)dict result:(FlutterResult)result {
-    NSLog(@"%s  dict:%@",__func__,dict);
-    
-    NSString *channelName = dict[@"channelName"];
-
-    NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:config
-                                                          delegate:nil
-                                                     delegateQueue:[NSOperationQueue mainQueue]];
-
-    NSString* strUrl = [NSString stringWithFormat:@"%@userAccount=%@&channelName=%@&appkey=%@",kSetChannelMapperURL,[EMClient sharedClient].currentUsername,channelName,[EMClient sharedClient].options.appkey];
-    NSString*utf8Url = [strUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLFragmentAllowedCharacterSet]];
-    NSURL* url = [NSURL URLWithString:utf8Url];
-    NSMutableURLRequest* urlReq = [[NSMutableURLRequest alloc] initWithURL:url];
-    [urlReq setValue:[NSString stringWithFormat:@"Bearer %@",[EMClient sharedClient].accessUserToken ] forHTTPHeaderField:@"Authorization"];
-    NSURLSessionDataTask *task = [session dataTaskWithRequest:urlReq completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        if(data) {
-            NSDictionary* body = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
-            NSLog(@"mapperBody:%@",body);
-            if(body) {
-                NSString* resCode = [body objectForKey:@"code"];
-                if([resCode isEqualToString:@"RES_0K"]) {
-                    NSString* channelName = [body objectForKey:@"channelName"];
-                    NSDictionary* result = [body objectForKey:@"result"];
-                    NSMutableDictionary<NSNumber*,NSString*>* users = [NSMutableDictionary dictionary];
-                    for (NSString* strId in result) {
-                        NSString* username = [result objectForKey:strId];
-                        NSNumber* uId = [NSNumber numberWithInteger:[strId integerValue]];
-                        [users setObject:username forKey:uId];
-                    }
-                    [[EaseCallManager sharedManager] setUsers:users channelName:channelName];
-//                    EaseCallUser* user = [[EaseCallUser alloc] init];
-//                    user.nickName = @"我的昵称";
-//                    user.headImage = [NSURL URLWithString:@"https://download-sdk.oss-cn-beijing.aliyuncs.com/downloads/IMDemo/avatar/Image1.png"];
-//                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:@"lxm" info:user];
-//                    EaseCallUser* user2 = [[EaseCallUser alloc] init];
-//                    user2.nickName = @"lxm9的昵称";
-//                    user2.headImage = [NSURL URLWithString:@"https://download-sdk.oss-cn-beijing.aliyuncs.com/downloads/IMDemo/avatar/Image2.png"];
-//                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:@"lxm9" info:user2];
-                }
-            }
-        }
-    }];
-
-    [task resume];
-}
 
 
 #pragma mark - EaseCallDelegate
@@ -293,10 +237,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 - (void)remoteUserDidJoinChannel:(NSString * _Nonnull)aChannelName uid:(NSInteger)aUid username:(NSString * _Nullable)aUserName {
     NSLog(@"%s  aChannelName:%@\n aUid:%@\n  aUserName:%@\n",__func__,aChannelName,@(aUid),aUserName);
-    
-    [self setRTCTokenWithAppId:@"" channelName:aChannelName account:aUserName uid:aUid];
-    
-    
+        
     if(aUserName.length > 0) {
         [[EMClient sharedClient].userInfoManager fetchUserInfoById:@[aUserName] completion:^(NSDictionary *aUserDatas, EMError *aError) {
             EMUserInfo* info = aUserDatas[aUserName];
@@ -373,32 +314,6 @@ dispatch_async(dispatch_get_main_queue(), block);\
     [EMClient.sharedClient initializeSDKWithOptions:options];
 }
 
-
-//- (void)initOptionAndLogin {
-//    if ([EMClient sharedClient].isLoggedIn) {
-//        return;
-//    }
-//    [self initHypheanteSDK];
-//    [self login];
-//}
-//
-//
-//- (void)login {
-//    NSString *userName = @"liu001";
-//    NSString *password = @"12345678";
-//
-//    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-//    [EMClient.sharedClient loginWithUsername:userName
-//                                       password:password
-//                                     completion:^(NSString *aUsername, EMError *aError) {
-//
-//        NSLog(@"aUsername:%@ aError:%@",aError,aUsername);
-//        dispatch_semaphore_signal(sema);
-//        NSLog(@"%s userName:%@ acctoken:%@",__func__,[EMClient sharedClient].currentUsername,[EMClient sharedClient].accessUserToken);
-//    }];
-//    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-//
-//}
 
 
 #pragma mark private method
@@ -569,5 +484,3 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 @end
 
-#undef kGetRTCTokenURL
-#undef kSetChannelMapperURL

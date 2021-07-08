@@ -33,7 +33,7 @@ android {
 }
 
 dependencies {
-    compileOnly 'io.hyphenate:ease-call-kit:3.8.1'
+    compileOnly 'io.hyphenate:ease-call-kit:3.8.1.1'
 }
 
 
