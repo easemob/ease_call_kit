@@ -189,6 +189,9 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
         if (ext != null && ext.length() > 0) {
           data.put("ext", ext);
         }
+        //收到接听电话
+        EMLog.d("onRecivedCall","onRecivedCall" + callType.name() + " fromUserId:" + fromUserId);
+
         channel.invokeMethod("callDidReceive", data);
       }
 

@@ -74,11 +74,11 @@ dispatch_async(dispatch_get_main_queue(), block);\
         }];
         
     }
-    
 
 //    EaseCallConfig *config = [EaseCallConfig fromJson:dict];
 //    [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
 //    result(@{});
+    
 }
 
 - (void)startSingleCall:(NSDictionary *)dict result:(FlutterResult)result{
@@ -108,18 +108,22 @@ dispatch_async(dispatch_get_main_queue(), block);\
 - (void)startInviteUsers:(NSDictionary *)dict result:(FlutterResult)result{
     NSArray *users = dict[@"users"];
     NSDictionary *ext = dict[@"ext"];
-    [[EaseCallManager sharedManager] startInviteUsers:users
-                                                  ext:ext
-                                           completion:^(NSString * _Nonnull callId, EaseCallError * error)
-     {
-        NSMutableDictionary *ret = [NSMutableDictionary dictionary];
-        if (error) {
-            ret[@"error"] = [error toJson];
-        }
-        ease_call_dispatch_main_async_safe(^(){
-            result(ret);
-        });
+    
+    [self setUserWithUserName:EMClient.sharedClient.currentUsername completion:^{
+        [[EaseCallManager sharedManager] startInviteUsers:users
+                                                      ext:ext
+                                               completion:^(NSString * _Nonnull callId, EaseCallError * error)
+         {
+            NSMutableDictionary *ret = [NSMutableDictionary dictionary];
+            if (error) {
+                ret[@"error"] = [error toJson];
+            }
+            ease_call_dispatch_main_async_safe(^(){
+                result(ret);
+            });
+        }];
     }];
+    
 }
 
 - (void)getEaseCallConfig:(NSDictionary *)dict result:(FlutterResult)result{
@@ -137,7 +141,6 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 
 - (void)setRTCTokenWithAppId:(NSString * _Nonnull)aAppId channelName:(NSString * _Nonnull)aChannelName account:(NSString * _Nonnull)aUserAccount uid:(NSInteger)aAgoraUid {
-    NSLog(@"%s\n aAppId:%@\n aChannelName:%@\n aUserAccount:%@\n aAgoraUid:%@\n",__func__,aAppId,aChannelName,aUserAccount,@(aAgoraUid));
 
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config
@@ -236,24 +239,28 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 
 - (void)remoteUserDidJoinChannel:(NSString * _Nonnull)aChannelName uid:(NSInteger)aUid username:(NSString * _Nullable)aUserName {
-    NSLog(@"%s  aChannelName:%@\n aUid:%@\n  aUserName:%@\n",__func__,aChannelName,@(aUid),aUserName);
-        
     if(aUserName.length > 0) {
-        [[EMClient sharedClient].userInfoManager fetchUserInfoById:@[aUserName] completion:^(NSDictionary *aUserDatas, EMError *aError) {
-            EMUserInfo* info = aUserDatas[aUserName];
-            if(info && (info.avatarUrl.length > 0 || info.nickName > 0)) {
-                EaseCallUser* user = [EaseCallUser userWithNickName:info.nickName image:[NSURL URLWithString:info.avatarUrl]];
-                
-                ease_call_dispatch_main_async_safe(^(){
-                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:aUserName info:user];
-                });
-                
-            }
-        }];
-    
+        [self setUserWithUserName:aUserName completion:nil];
     }else{
         [self fetchUserMapsFromServerWithChannelName:aChannelName];
     }
+}
+
+- (void)setUserWithUserName:(NSString *)userName completion:(void (^)(void))completion {
+    [[EMClient sharedClient].userInfoManager fetchUserInfoById:@[userName] completion:^(NSDictionary *aUserDatas, EMError *aError) {
+        EMUserInfo* info = aUserDatas[userName];
+        if(info) {
+            EaseCallUser* user = [EaseCallUser userWithNickName:info.nickName image:[NSURL URLWithString:info.avatarUrl]];
+            
+            ease_call_dispatch_main_async_safe(^(){
+                [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:userName info:user];
+                if (completion) {
+                    completion();
+                }
+            });
+            
+        }
+    }];
 }
 
 - (void)fetchUserMapsFromServerWithChannelName:(NSString*)aChannelName
@@ -284,17 +291,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
                         NSString* username = [result objectForKey:strId];
                         NSNumber* uId = [NSNumber numberWithInteger:[strId integerValue]];
                         [users setObject:username forKey:uId];
-                        [[EMClient sharedClient].userInfoManager fetchUserInfoById:@[username] completion:^(NSDictionary *aUserDatas, EMError *aError) {
-                            EMUserInfo* info = aUserDatas[username];
-                            if(info && (info.avatarUrl.length > 0 || info.nickName > 0)) {
-                                EaseCallUser* user = [EaseCallUser userWithNickName:info.nickName image:[NSURL URLWithString:info.avatarUrl]];
-                                
-                                ease_call_dispatch_main_async_safe(^(){
-                                    [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:username info:user];
-                                });
-                                
-                            }
-                        }];
+                        [self setUserWithUserName:username completion:nil];
                     }
                     [[EaseCallManager sharedManager] setUsers:users channelName:channelName];
                 }
