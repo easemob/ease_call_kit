@@ -24,6 +24,7 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
     Map<String, EaseCallUser> userMap = HashMap();
     userMap[agoraUserId] = aUser;
     config.userMap = userMap;
+    config.callTimeOut = 30 * 30 * 1000;
 
     EaseCallKit.initWithConfig(config);
     EaseCallKit.listener = this;
@@ -63,10 +64,12 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
                 FlatButton(
                   child: Text('多人'),
                   onPressed: () {
+                    Map<String, String> ext = HashMap();
+                    ext["groupId"] = "153539520299009";
                     EaseCallKit.startInviteUsers([
                       'liu002',
                       'liu003',
-                    ]);
+                    ], ext: ext);
                   },
                 ),
               ],

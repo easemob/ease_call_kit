@@ -10,20 +10,21 @@ import io.flutter.embedding.android.FlutterActivity;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMOptions;
+import com.hyphenate.easecallkit.EaseCallKit;
 
 public class MainActivity extends FlutterActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EMOptions emOptions = new EMOptions();
-//        emOptions.setAppKey("easemob-demo#chatdemoui");
         emOptions.setAppKey("easemob-demo#easeim");
-
         EMClient.getInstance().init(this.getApplicationContext(), emOptions);
+
         EMClient.getInstance().login("liu001", "12345678", new EMCallBack() {
             @Override
             public void onSuccess() {
-                Log.v("getCurrentUser", "EMClient.getInstance().getCurrentUser() = "+EMClient.getInstance().getCurrentUser());
+                String loginUserName = EMClient.getInstance().getCurrentUser();
+                Log.v("loginUserName", "loginUserName:" + loginUserName);
             }
 
             @Override

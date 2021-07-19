@@ -48,15 +48,18 @@ dispatch_async(dispatch_get_main_queue(), block);\
     if ([EMClient sharedClient].isLoggedIn) {
         EaseCallConfig *config = [EaseCallConfig fromJson:dict];
         [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
-        result(@{});
-        ease_call_dispatch_main_async_safe(^(){
-            result(@{});
-        });
+
+        [self setUserWithUserName:EMClient.sharedClient.currentUsername completion:^{
+            ease_call_dispatch_main_async_safe(^(){
+                result(@{});
+            });
+        }];
         
     }else {
       
         [self initHypheanteSDK];
-        
+
+#warning login for temp
         NSString *userName = @"liu001";
         NSString *password = @"12345678";
 
@@ -66,19 +69,16 @@ dispatch_async(dispatch_get_main_queue(), block);\
                         
             EaseCallConfig *config = [EaseCallConfig fromJson:dict];
             [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
-            result(@{});
-            ease_call_dispatch_main_async_safe(^(){
-                result(@{});
-            });
-            
+            [self setUserWithUserName:EMClient.sharedClient.currentUsername completion:^{
+                ease_call_dispatch_main_async_safe(^(){
+                    result(@{});
+                });
+            }];
+                
         }];
         
     }
 
-//    EaseCallConfig *config = [EaseCallConfig fromJson:dict];
-//    [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
-//    result(@{});
-    
 }
 
 - (void)startSingleCall:(NSDictionary *)dict result:(FlutterResult)result{
@@ -87,8 +87,6 @@ dispatch_async(dispatch_get_main_queue(), block);\
     NSString *emId = dict[@"em_id"];
     NSDictionary *ext = dict[@"ext"];
     
-    NSLog(@"%s dict:%@\n",__func__,dict);
-
     [[EaseCallManager sharedManager] startSingleCallWithUId:emId
                                                        type:type
                                                         ext:ext
@@ -220,6 +218,9 @@ dispatch_async(dispatch_get_main_queue(), block);\
     NSMutableDictionary *arg = [NSMutableDictionary dictionary];
     arg[@"exclude_users"] = users;
     arg[@"ext"] = aExt;
+    
+    NSLog(@"%s users:%@ aExt:%@",__func__,users,aExt);
+
     [self.channel invokeMethod:@"multiCallDidInviting" arguments:arg];
 }
 

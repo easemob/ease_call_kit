@@ -1,13 +1,17 @@
 package com.easemob.callkit.ease_call_kit;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Pair;
 
 import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMOptions;
 import com.hyphenate.chat.EMUserInfo;
 import com.hyphenate.cloud.EMHttpClient;
 import com.hyphenate.easecallkit.EaseCallKit;
@@ -37,10 +41,15 @@ import androidx.annotation.NonNull;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.common.JSONUtil;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+
+
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /** EaseCallKitPlugin */
 public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
@@ -54,6 +63,8 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
 
   private String tokenUrl = "http://a1.easemob.com/token/rtcToken/v1";
   private String uIdUrl = "http://a1.easemob.com/channel/mapper";
+
+
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -86,12 +97,15 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     }
   }
 
-  private void initWithConfig(JSONObject map, Result result) throws JSONException {
+  private void initWithConfig(JSONObject map, final Result result) throws JSONException {
 
     EaseCallKit.getInstance().init(this.binding.getApplicationContext(), configFromJson(map));
-    Map<String, Object> data = new HashMap<>();
+    final Map<String, Object> data = new HashMap<>();
+    setEaseCallKitUserInfo(EMClient.getInstance().getCurrentUser());
     result.success(data);
+
   }
+
 
   private void startSingleCall(JSONObject map, Result result) throws JSONException {
     int callType = map.getInt("call_type");
@@ -112,6 +126,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     Map ext = JsonObjectToHashMap(map.getJSONObject("ext"));
     EaseCallKit.getInstance().startInviteMultipleCall(users, ext);
     this.result = result;
+
   }
 
   private void getEaseCallConfig(JSONObject map, Result result) {
@@ -127,15 +142,6 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
 
-  private void getRTCToken(JSONObject map, Result result) throws JSONException {
-    String username = map.getString("username");
-    String password = map.getString("password");
-    String channelName = map.getString("channelName");
-    String agoraUserId = map.getString("agoraUserId");
-    String appkey = map.getString("appkey");
-    Log.v("getRTCToken", "userName=" + username +"password"+password +"channelName"+channelName+"agoraUserId"+agoraUserId);
-  }
-
   private void addCallKitListener() {
     callKitListener = new EaseCallKitListener() {
       @Override
@@ -144,6 +150,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
         data.put("exclude_users", userId);
         data.put("ext", ext);
         channel.invokeMethod("multiCallDidInviting", data);
+
       }
 
       @Override
@@ -159,12 +166,6 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
 
       @Override
       public void onGenerateToken(String userId, String channelName, String appKey, EaseCallKitTokenCallback callback) {
-//        weakCallback = new WeakReference<>(callback);
-//        Map<String, Object> data = new HashMap<>();
-//        data.put("app_id", appKey);
-//        data.put("account", userId);
-//        data.put("channel_name", channelName);
-//        channel.invokeMethod("callDidRequestRTCToken", data);
 
         EMLog.d("onGenerateToken","onGenerateToken userId:" + userId + " channelName:" + channelName + " appKey:"+ appKey);
         String url = tokenUrl;
@@ -181,19 +182,25 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
 
       }
 
+
       @Override
-      public void onReceivedCall(EaseCallType callType, String fromUserId, JSONObject ext) {
+      public void onReceivedCall(EaseCallType callType, String fromUserId, JSONObject ext)  {
         Map<String, Object> data = new HashMap<>();
         data.put("call_type", callTypeToInt(callType));
         data.put("inviter", fromUserId);
-        if (ext != null && ext.length() > 0) {
-          data.put("ext", ext);
-        }
-        //收到接听电话
-        EMLog.d("onRecivedCall","onRecivedCall" + callType.name() + " fromUserId:" + fromUserId);
 
+        if (ext != null && ext.length() > 0) {
+          String  jsonString = ext.toString();
+          data.put("ext", jsonString);
+        }
+
+        //收到接听电话
+        Log.e("onRecivedCall","onRecivedCall" + callType.name() + " fromUserId:" + fromUserId);
         channel.invokeMethod("callDidReceive", data);
+
       }
+
+
 
       @Override
       public void onCallError(EaseCallKit.EaseCallError type, int errorCode, String description) {
@@ -373,15 +380,8 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
    * @param userName
    */
   private void setEaseCallKitUserInfo(final String userName){
-//    EaseUser user = getUserInfo(userName);
-//    EaseCallUserInfo userInfo = new EaseCallUserInfo();
-//    if(user != null){
-//      userInfo.setNickName(user.getNickname());
-//      userInfo.setHeadImage(user.getAvatar());
-//    }
-//    EaseCallKit.getInstance().getCallKitConfig().setUserInfo(userName,userInfo);
 
-    EMValueCallBack<Map<String,EMUserInfo>> callBack = new EMValueCallBack<Map<String, EMUserInfo>>() {
+    final EMValueCallBack<Map<String,EMUserInfo>> callBack = new EMValueCallBack<Map<String, EMUserInfo>>() {
       @Override
       public void onSuccess(Map<String, EMUserInfo> value) {
         EaseCallUserInfo userInfo = new EaseCallUserInfo();
@@ -395,7 +395,6 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
 
       @Override
       public void onError(int error, String errorMsg) {
-
       }
     };
 

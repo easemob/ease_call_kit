@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:flutter/services.dart';
 
@@ -104,9 +105,11 @@ class EaseCallKit {
     req['users'] = users;
     req['ext'] = ext ?? {};
     Map result = await _channel.invokeMethod('startInviteUsers', req);
+
     if (result['error'] != null) {
       throw (EaseCallError.fromJson(result['error']));
     }
+    print('startInviteUsers result: $result');
   }
 
   // 获取EaseCallKit的配置
