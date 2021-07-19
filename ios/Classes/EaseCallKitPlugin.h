@@ -1,7 +1,9 @@
 #import <Flutter/Flutter.h>
 #import <EaseCallKit/EaseCallUIKit.h>
+#import "EaseCallKitSDKMethod.h"
 
 @interface EaseCallKitPlugin : NSObject<FlutterPlugin>
+
 @end
 
 

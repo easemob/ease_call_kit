@@ -1,9 +1,19 @@
 package com.easemob.callkit.ease_call_kit;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
+import android.util.Pair;
 
+import com.hyphenate.EMValueCallBack;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMOptions;
+import com.hyphenate.chat.EMUserInfo;
+import com.hyphenate.cloud.EMHttpClient;
 import com.hyphenate.easecallkit.EaseCallKit;
 import com.hyphenate.easecallkit.base.EaseCallEndReason;
 import com.hyphenate.easecallkit.base.EaseCallKitConfig;
@@ -11,23 +21,35 @@ import com.hyphenate.easecallkit.base.EaseCallKitListener;
 import com.hyphenate.easecallkit.base.EaseCallKitTokenCallback;
 import com.hyphenate.easecallkit.base.EaseCallType;
 import com.hyphenate.easecallkit.base.EaseCallUserInfo;
+import com.hyphenate.easecallkit.base.EaseGetUserAccountCallback;
+import com.hyphenate.easecallkit.base.EaseUserAccount;
+import com.hyphenate.exceptions.HyphenateException;
+import com.hyphenate.util.EMLog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.common.JSONUtil;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+
+
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /** EaseCallKitPlugin */
 public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
@@ -38,6 +60,11 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   private Result result;
   private WeakReference<EaseCallKitTokenCallback> weakCallback;
   private EaseCallKitListener callKitListener;
+
+  private String tokenUrl = "http://a1.easemob.com/token/rtcToken/v1";
+  private String uIdUrl = "http://a1.easemob.com/channel/mapper";
+
+
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -70,12 +97,15 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     }
   }
 
-  private void initWithConfig(JSONObject map, Result result) throws JSONException {
+  private void initWithConfig(JSONObject map, final Result result) throws JSONException {
 
     EaseCallKit.getInstance().init(this.binding.getApplicationContext(), configFromJson(map));
-    Map<String, Object> data = new HashMap<>();
+    final Map<String, Object> data = new HashMap<>();
+    setEaseCallKitUserInfo(EMClient.getInstance().getCurrentUser());
     result.success(data);
+
   }
+
 
   private void startSingleCall(JSONObject map, Result result) throws JSONException {
     int callType = map.getInt("call_type");
@@ -96,6 +126,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     Map ext = JsonObjectToHashMap(map.getJSONObject("ext"));
     EaseCallKit.getInstance().startInviteMultipleCall(users, ext);
     this.result = result;
+
   }
 
   private void getEaseCallConfig(JSONObject map, Result result) {
@@ -106,9 +137,10 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     String rtcToken = map.getString("rtc_token");
     String channelName = map.getString("channel_name");
     if (this.weakCallback.get() != null) {
-      this.weakCallback.get().onSetToken(rtcToken);
+      this.weakCallback.get().onSetToken(rtcToken,1);
     }
   }
+
 
   private void addCallKitListener() {
     callKitListener = new EaseCallKitListener() {
@@ -118,6 +150,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
         data.put("exclude_users", userId);
         data.put("ext", ext);
         channel.invokeMethod("multiCallDidInviting", data);
+
       }
 
       @Override
@@ -133,24 +166,41 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
 
       @Override
       public void onGenerateToken(String userId, String channelName, String appKey, EaseCallKitTokenCallback callback) {
-        weakCallback = new WeakReference<>(callback);
-        Map<String, Object> data = new HashMap<>();
-        data.put("app_id", appKey);
-        data.put("account", userId);
-        data.put("channel_name", channelName);
-        channel.invokeMethod("callDidRequestRTCToken", data);
+
+        EMLog.d("onGenerateToken","onGenerateToken userId:" + userId + " channelName:" + channelName + " appKey:"+ appKey);
+        String url = tokenUrl;
+        url += "?";
+        url += "userAccount=";
+        url += userId;
+        url += "&channelName=";
+        url += channelName;
+        url += "&appkey=";
+        url +=  appKey;
+
+        //获取声网Token
+        getRtcToken(url, callback);
+
       }
 
+
       @Override
-      public void onReceivedCall(EaseCallType callType, String fromUserId, JSONObject ext) {
+      public void onReceivedCall(EaseCallType callType, String fromUserId, JSONObject ext)  {
         Map<String, Object> data = new HashMap<>();
         data.put("call_type", callTypeToInt(callType));
         data.put("inviter", fromUserId);
+
         if (ext != null && ext.length() > 0) {
-          data.put("ext", ext);
+          String  jsonString = ext.toString();
+          data.put("ext", jsonString);
         }
+
+        //收到接听电话
+        Log.e("onRecivedCall","onRecivedCall" + callType.name() + " fromUserId:" + fromUserId);
         channel.invokeMethod("callDidReceive", data);
+
       }
+
+
 
       @Override
       public void onCallError(EaseCallKit.EaseCallError type, int errorCode, String description) {
@@ -183,8 +233,175 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
           }
         });
       }
+
+      @Override
+      public void onRemoteUserJoinChannel(String channelName, String userName, int uid, EaseGetUserAccountCallback callback) {
+        if(userName == null || userName == ""){
+          String url = uIdUrl;
+          url += "?";
+          url += "channelName=";
+          url += channelName;
+          url += "&userAccount=";
+          url += EMClient.getInstance().getCurrentUser();
+          url += "&appkey=";
+          url +=  EMClient.getInstance().getOptions().getAppKey();
+          getUserIdAgoraUid(uid,url,callback);
+        }else{
+          //设置用户昵称 头像
+          setEaseCallKitUserInfo(userName);
+          EaseUserAccount account = new EaseUserAccount(uid,userName);
+          List<EaseUserAccount> accounts = new ArrayList<>();
+          accounts.add(account);
+          callback.onUserAccount(accounts);
+        }
+      }
     };
     EaseCallKit.getInstance().setCallKitListener(callKitListener);
+  }
+
+
+
+  /**
+   * 获取声网Token
+   *
+   */
+  private void getRtcToken(final String tokenUrl, final EaseCallKitTokenCallback callback){
+    new AsyncTask<String, Void, Pair<Integer, String>>(){
+      @Override
+      protected Pair<Integer, String> doInBackground(String... str) {
+        try {
+          Pair<Integer, String> response = EMHttpClient.getInstance().sendRequestWithToken(tokenUrl, null,EMHttpClient.GET);
+          return response;
+        }catch (HyphenateException exception) {
+          exception.printStackTrace();
+        }
+        return  null;
+      }
+      @Override
+      protected void onPostExecute(Pair<Integer, String> response) {
+        if(response != null) {
+          try {
+            int resCode = response.first;
+            if(resCode == 200){
+              String responseInfo = response.second;
+              if(responseInfo != null && responseInfo.length() > 0){
+                try {
+                  JSONObject object = new JSONObject(responseInfo);
+                  String token = object.getString("accessToken");
+                  int uId = object.getInt("agoraUserId");
+
+                  //设置自己头像昵称
+                  setEaseCallKitUserInfo(EMClient.getInstance().getCurrentUser());
+                  callback.onSetToken(token,uId);
+                }catch (Exception e){
+                  e.getStackTrace();
+                }
+              }else{
+                callback.onGetTokenError(response.first,response.second);
+              }
+            }else{
+              callback.onGetTokenError(response.first,response.second);
+            }
+          }catch (Exception e){
+            e.printStackTrace();
+          }
+        }else{
+          callback.onSetToken(null,0);
+        }
+      }
+    }.execute(tokenUrl);
+  }
+
+  /**
+   * 根据channelName和声网uId获取频道内所有人的UserId
+   * @param uId
+   * @param url
+   * @param callback
+   */
+  private void getUserIdAgoraUid(final int uId, final String url, final EaseGetUserAccountCallback callback){
+    new AsyncTask<String, Void, Pair<Integer, String>>(){
+      @Override
+      protected Pair<Integer, String> doInBackground(String... str) {
+        try {
+          Pair<Integer, String> response = EMHttpClient.getInstance().sendRequestWithToken(url, null,EMHttpClient.GET);
+          return response;
+        }catch (HyphenateException exception) {
+          exception.printStackTrace();
+        }
+        return  null;
+      }
+      @Override
+      protected void onPostExecute(Pair<Integer, String> response) {
+        if(response != null) {
+          try {
+            int resCode = response.first;
+            if(resCode == 200){
+              String responseInfo = response.second;
+              List<EaseUserAccount> userAccounts = new ArrayList<>();
+              if(responseInfo != null && responseInfo.length() > 0){
+                try {
+                  JSONObject object = new JSONObject(responseInfo);
+                  JSONObject resToken = object.getJSONObject("result");
+                  Iterator it = resToken.keys();
+                  while(it.hasNext()) {
+                    String uIdStr = it.next().toString();
+                    int uid = 0;
+                    uid = Integer.valueOf(uIdStr).intValue();
+                    String username = resToken.optString(uIdStr);
+                    if(uid == uId){
+                      //获取到当前用户的userName 设置头像昵称等信息
+                      setEaseCallKitUserInfo(username);
+                    }
+                    userAccounts.add(new EaseUserAccount(uid, username));
+                  }
+                  callback.onUserAccount(userAccounts);
+                }catch (Exception e){
+                  e.getStackTrace();
+                }
+              }else{
+                callback.onSetUserAccountError(response.first,response.second);
+              }
+            }else{
+              callback.onSetUserAccountError(response.first,response.second);
+            }
+          }catch (Exception e){
+            e.printStackTrace();
+          }
+        }else{
+          callback.onSetUserAccountError(100,"response is null");
+        }
+      }
+    }.execute(url);
+  }
+
+
+  /**
+   * 设置callKit 用户头像昵称
+   * @param userName
+   */
+  private void setEaseCallKitUserInfo(final String userName){
+
+    final EMValueCallBack<Map<String,EMUserInfo>> callBack = new EMValueCallBack<Map<String, EMUserInfo>>() {
+      @Override
+      public void onSuccess(Map<String, EMUserInfo> value) {
+        EaseCallUserInfo userInfo = new EaseCallUserInfo();
+        EMUserInfo cUserInfo = value.get(userName);
+        if(cUserInfo != null){
+          userInfo.setNickName(cUserInfo.getUserId());
+          userInfo.setHeadImage(cUserInfo.getAvatarUrl());
+        }
+        EaseCallKit.getInstance().getCallKitConfig().setUserInfo(userName,userInfo);
+      }
+
+      @Override
+      public void onError(int error, String errorMsg) {
+      }
+    };
+
+    String[] userIds = new String[1];
+    userIds[0] = userName;
+    EMClient.getInstance().userInfoManager().fetchUserInfoByUserId(userIds,callBack);
+
   }
 
   private static HashMap<String, Object> JsonObjectToHashMap(JSONObject data) throws JSONException {
@@ -228,6 +445,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     }
 
     this.enableRTCTokenValidate = map.getBoolean("enable_rtc_token_validate");
+    config.setEnableRTCToken(this.enableRTCTokenValidate);
     Map<String, EaseCallUserInfo> userMap = new HashMap<>();
     if (map.has("user_map")) {
       JSONArray usersList = map.getJSONArray("user_map");

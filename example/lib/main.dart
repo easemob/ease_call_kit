@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:ease_call_kit/ease_call_kit.dart';
 import 'package:flutter/material.dart';
 
@@ -14,9 +16,20 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
   @override
   void initState() {
     super.initState();
-    var config = EaseCallConfig('15cb0d28b87b425ea613fc46f7c9f974');
+    // var config = EaseCallConfig('15cb0d28b87b425ea613fc46f7c9f974');
+    String agoraUserId = "15cb0d28b87b425ea613fc46f7c9f974";
+    EaseCallConfig config =
+        EaseCallConfig(agoraUserId, enableRTCTokenValidate: true);
+    EaseCallUser aUser = EaseCallUser("liu001昵称");
+    Map<String, EaseCallUser> userMap = HashMap();
+    userMap[agoraUserId] = aUser;
+    config.userMap = userMap;
+    config.callTimeOut = 30 * 30 * 1000;
+
     EaseCallKit.initWithConfig(config);
     EaseCallKit.listener = this;
+
+    print('initState agoraUserId:$agoraUserId userMap:$userMap');
   }
 
   @override
@@ -34,7 +47,7 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
                   child: Text('1v1音频'),
                   onPressed: () {
                     EaseCallKit.startSingleCall(
-                      'du002',
+                      'liu002',
                       callType: EaseCallType.SingeAudio,
                     );
                   },
@@ -43,7 +56,7 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
                   child: Text('1v1视频'),
                   onPressed: () {
                     EaseCallKit.startSingleCall(
-                      'du002',
+                      'liu002',
                       callType: EaseCallType.SingeVideo,
                     );
                   },
@@ -51,12 +64,12 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
                 FlatButton(
                   child: Text('多人'),
                   onPressed: () {
+                    Map<String, String> ext = HashMap();
+                    ext["groupId"] = "153539520299009";
                     EaseCallKit.startInviteUsers([
-                      'du002',
-                      'du003',
-                      'du004',
-                      'du005',
-                    ]);
+                      'liu002',
+                      'liu003',
+                    ], ext: ext);
                   },
                 ),
               ],
@@ -77,21 +90,21 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
   void callDidEnd(String channelName, EaseCallEndReason reason, int time,
       EaseCallType callType) {
     print(
-      'channelName --$channelName, reason -- $reason, time -- $time, callType -- $callType',
+      '[callDidEnd] channelName --$channelName, reason -- $reason, time -- $time, callType -- $callType',
     );
   }
 
   @override
   void callDidOccurError(EaseCallError error) {
     print(
-      'error --$error',
+      '[callDidOccurError] --$error',
     );
   }
 
   @override
   void callDidReceive(EaseCallType callType, String inviter, Map ext) {
     print(
-      'callType --$callType, inviter -- $inviter, ext -- $ext',
+      'callDidReceive callType --$callType, inviter -- $inviter, ext -- $ext',
     );
   }
 
@@ -99,14 +112,19 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
   void callDidRequestRTCToken(
       String appId, String channelName, String account) {
     print(
-      'appId --$appId, channelName -- $channelName, account -- $account',
+      '[callDidRequestRTCToken] appId --$appId, channelName -- $channelName, account -- $account',
+    );
+
+    EaseCallKit.getRTCToken(
+      channelName,
+      appId,
     );
   }
 
   @override
   void multiCallDidInviting(List<String> excludeUsers, Map ext) {
     print(
-      'excludeUsers --$excludeUsers, ext -- $ext',
+      '[multiCallDidInviting] excludeUsers--$excludeUsers, ext -- $ext',
     );
   }
 }

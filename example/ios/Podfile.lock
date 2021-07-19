@@ -2,32 +2,42 @@ PODS:
   - AgoraRtcEngine_iOS (3.3.0)
   - ease_call_kit (0.0.1):
     - AgoraRtcEngine_iOS (= 3.3.0)
-    - EaseCallKit (= 3.8.0.2)
+    - EaseCallKit (= 3.8.1.1)
     - Flutter
     - Masonry
     - SDWebImage
-  - EaseCallKit (3.8.0.2):
+  - EaseCallKit (3.8.1.1):
+    - AgoraRtcEngine_iOS
     - HyphenateChat
     - Masonry
-    - SDWebImage (~> 3.7.2)
+    - SDWebImage
   - Flutter (1.0.0)
-  - HyphenateChat (3.8.0)
+  - Hyphenate (3.7.4.2)
+  - HyphenateChat (3.8.3)
   - Masonry (1.1.0)
-  - SDWebImage (3.7.6):
-    - SDWebImage/Core (= 3.7.6)
-  - SDWebImage/Core (3.7.6)
+  - MBProgressHUD (1.2.0)
+  - SDWebImage (5.11.1):
+    - SDWebImage/Core (= 5.11.1)
+  - SDWebImage/Core (5.11.1)
+  - WHToast (0.0.7)
 
 DEPENDENCIES:
   - ease_call_kit (from `.symlinks/plugins/ease_call_kit/ios`)
   - Flutter (from `Flutter`)
+  - Hyphenate
+  - MBProgressHUD
+  - WHToast
 
 SPEC REPOS:
   trunk:
     - AgoraRtcEngine_iOS
     - EaseCallKit
+    - Hyphenate
     - HyphenateChat
     - Masonry
+    - MBProgressHUD
     - SDWebImage
+    - WHToast
 
 EXTERNAL SOURCES:
   ease_call_kit:
@@ -37,13 +47,16 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AgoraRtcEngine_iOS: 1a0adbf959ab5175b700c8bab30b1346fc27ef1a
-  ease_call_kit: d7cd6879aed53a7daddf96443cdbde758b95b2e7
-  EaseCallKit: 2a014f5de84895f3d390ba680661818d13ba7520
+  ease_call_kit: 0843ef497872efc07c3ea6b3a3903af71fd8bc25
+  EaseCallKit: e7c3ed4608cf71674ac5aa49e98df190aa28309b
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  HyphenateChat: 254bab73137e88ffb6394ad5de0c8941e0e2d3d7
+  Hyphenate: 11e0643d2586063166f080bc984fd5dd2db4f220
+  HyphenateChat: e906fe5e2bec83c981ee81f21d6aa2f8c917576c
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  SDWebImage: c325cf02c30337336b95beff20a13df489ec0ec9
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
+  SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
+  WHToast: 11a17a3f09f5f733e32bd6f3338919a448cbb719
 
-PODFILE CHECKSUM: f7ecce632c561a077491bb96eace2c0b5f41bf3b
+PODFILE CHECKSUM: 7b5086ca3437acebee53d897b135e7a14ec6fe7c
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.10.1
