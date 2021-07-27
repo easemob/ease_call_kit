@@ -4,7 +4,9 @@ PODS:
     - AgoraRtcEngine_iOS (= 3.3.0)
     - EaseCallKit (= 3.8.1.1)
     - Flutter
+    - HyphenateChat (~> 3.8.1)
     - Masonry
+    - MBProgressHUD
     - SDWebImage
   - EaseCallKit (3.8.1.1):
     - AgoraRtcEngine_iOS
@@ -12,32 +14,25 @@ PODS:
     - Masonry
     - SDWebImage
   - Flutter (1.0.0)
-  - Hyphenate (3.7.4.2)
-  - HyphenateChat (3.8.3)
+  - HyphenateChat (3.8.3.1)
   - Masonry (1.1.0)
   - MBProgressHUD (1.2.0)
   - SDWebImage (5.11.1):
     - SDWebImage/Core (= 5.11.1)
   - SDWebImage/Core (5.11.1)
-  - WHToast (0.0.7)
 
 DEPENDENCIES:
   - ease_call_kit (from `.symlinks/plugins/ease_call_kit/ios`)
   - Flutter (from `Flutter`)
-  - Hyphenate
-  - MBProgressHUD
-  - WHToast
 
 SPEC REPOS:
   trunk:
     - AgoraRtcEngine_iOS
     - EaseCallKit
-    - Hyphenate
     - HyphenateChat
     - Masonry
     - MBProgressHUD
     - SDWebImage
-    - WHToast
 
 EXTERNAL SOURCES:
   ease_call_kit:
@@ -47,16 +42,14 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AgoraRtcEngine_iOS: 1a0adbf959ab5175b700c8bab30b1346fc27ef1a
-  ease_call_kit: 0843ef497872efc07c3ea6b3a3903af71fd8bc25
+  ease_call_kit: c2bf2cb7edb5e8838fc5488240659bf99c1679d5
   EaseCallKit: e7c3ed4608cf71674ac5aa49e98df190aa28309b
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  Hyphenate: 11e0643d2586063166f080bc984fd5dd2db4f220
-  HyphenateChat: e906fe5e2bec83c981ee81f21d6aa2f8c917576c
+  HyphenateChat: dc9bedc84c610b9031c86a36b3231604d01026b4
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
-  WHToast: 11a17a3f09f5f733e32bd6f3338919a448cbb719
 
-PODFILE CHECKSUM: 7b5086ca3437acebee53d897b135e7a14ec6fe7c
+PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
 
 COCOAPODS: 1.10.1
