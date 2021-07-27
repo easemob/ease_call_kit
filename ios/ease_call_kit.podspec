@@ -24,4 +24,7 @@ A new flutter plugin project.
   s.dependency 'AgoraRtcEngine_iOS', '3.3.0'
   s.dependency 'Masonry'
   s.dependency 'SDWebImage'
+  s.dependency 'HyphenateChat', '~>3.8.1'
+  s.dependency 'MBProgressHUD'
+  
 end

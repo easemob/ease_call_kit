@@ -8,8 +8,6 @@ block();\
 dispatch_async(dispatch_get_main_queue(), block);\
 }
 
-#define EASEMOB_APP_KEY @"easemob-demo#easeim"
-
 
 @interface EaseCallKitPlugin()<EaseCallDelegate>
 @property (nonatomic, strong) FlutterMethodChannel* channel;
@@ -43,8 +41,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
 }
 
 - (void)initCallKit:(NSDictionary *)dict result:(FlutterResult)result{
-    NSLog(@"%s dict:%@\n",__func__,dict);
-    
+
     if ([EMClient sharedClient].isLoggedIn) {
         EaseCallConfig *config = [EaseCallConfig fromJson:dict];
         [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
@@ -56,27 +53,9 @@ dispatch_async(dispatch_get_main_queue(), block);\
         }];
         
     }else {
-      
-        [self initHypheanteSDK];
-
-#warning login for temp
-        NSString *userName = @"liu001";
-        NSString *password = @"12345678";
-
-        [EMClient.sharedClient loginWithUsername:userName
-                                           password:password
-                                         completion:^(NSString *aUsername, EMError *aError) {
-                        
-            EaseCallConfig *config = [EaseCallConfig fromJson:dict];
-            [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
-            [self setUserWithUserName:EMClient.sharedClient.currentUsername completion:^{
-                ease_call_dispatch_main_async_safe(^(){
-                    result(@{});
-                });
-            }];
-                
-        }];
-        
+        EaseCallConfig *config = [EaseCallConfig fromJson:dict];
+        [[EaseCallManager sharedManager] initWithConfig:config delegate:self];
+        result(@{@"errorCode":@(EMErrorUserNotLogin)});
     }
 
 }
@@ -234,7 +213,6 @@ dispatch_async(dispatch_get_main_queue(), block);\
                            channelName:(NSString * _Nonnull)aChannelName
                                account:(NSString * _Nonnull)aUserAccount
                                    uid:(NSInteger)aAgoraUid {
-    NSLog(@"%s aAppId:%@\n aChannelName:%@\n aUserAccount:%@\n  aAgoraUid:%@\n",__func__,aAppId,aChannelName,aUserAccount,@(aAgoraUid));
     [self setRTCTokenWithAppId:aAppId channelName:aChannelName account:aUserAccount uid:aAgoraUid];
 }
 
@@ -302,16 +280,6 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
     [task resume];
 }
-
-#warning temp for test
-- (void)initHypheanteSDK {
-    EMOptions *options = [EMOptions optionsWithAppkey:EASEMOB_APP_KEY];
-    options.enableConsoleLog = YES;
-    // 为了方便演示，设置自动同意好友申请。
-    options.isAutoAcceptFriendInvitation = YES;
-    [EMClient.sharedClient initializeSDKWithOptions:options];
-}
-
 
 
 #pragma mark private method
