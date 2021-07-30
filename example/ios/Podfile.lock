@@ -4,7 +4,7 @@ PODS:
     - AgoraRtcEngine_iOS (= 3.3.0)
     - EaseCallKit (= 3.8.1.1)
     - Flutter
-    - HyphenateChat (~> 3.8.1)
+    - HyphenateChat (~> 3.8.3.1)
     - Masonry
     - MBProgressHUD
     - SDWebImage
@@ -42,7 +42,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AgoraRtcEngine_iOS: 1a0adbf959ab5175b700c8bab30b1346fc27ef1a
-  ease_call_kit: c2bf2cb7edb5e8838fc5488240659bf99c1679d5
+  ease_call_kit: 64862754d978812663aa92519df92a0b79f8b8f9
   EaseCallKit: e7c3ed4608cf71674ac5aa49e98df190aa28309b
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   HyphenateChat: dc9bedc84c610b9031c86a36b3231604d01026b4
