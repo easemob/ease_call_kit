@@ -5,3 +5,4 @@
 .pub/
 .history
 build/
+**.idea/
