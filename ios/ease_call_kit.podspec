@@ -20,7 +20,7 @@ A new flutter plugin project.
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
   s.dependency 'EaseCallKit', '3.8.1.1'
-  s.dependency 'AgoraRtcEngine_iOS', '3.3.0'
+  s.dependency 'AgoraRtcEngine_iOS', '3.4.6'
   s.dependency 'Masonry'
   s.dependency 'SDWebImage'
   s.dependency 'HyphenateChat', '~>3.8.3.1'
