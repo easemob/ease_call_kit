@@ -6,3 +6,17 @@
 .history
 build/
 **.idea/
+**.idea/*
+**.vscode/
+**.vscode/*
+
+android/.settings/
+example/pubspec.lock
+pubspec.lock
+
+gradlew
+package_config.json
+gradlew.bat
+gradle-wrapper.jar
+gradle-wrapper.properties
+.flutter-plugins-dependencies
