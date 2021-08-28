@@ -110,7 +110,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   private void startSingleCall(JSONObject map, Result result) throws JSONException {
     int callType = map.getInt("call_type");
     String user = map.getString("em_id");
-    Map ext = JsonObjectToHashMap(map.getJSONObject("ext"));
+    Map<String,Object> ext = JsonObjectToHashMap(map.getJSONObject("ext"));
 
     EaseCallKit.getInstance()
         .startSingleCall(callType == 0 ? EaseCallType.SINGLE_VOICE_CALL : EaseCallType.SINGLE_VIDEO_CALL, user, ext);
@@ -123,7 +123,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     for (int i = 0; i < usersArray.length(); i++) {
       users[i] = (String) usersArray.get(i);
     }
-    Map ext = JsonObjectToHashMap(map.getJSONObject("ext"));
+    Map<String,Object> ext = JsonObjectToHashMap(map.getJSONObject("ext"));
     EaseCallKit.getInstance().startInviteMultipleCall(users, ext);
     this.result = result;
 
@@ -405,7 +405,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private static HashMap<String, Object> JsonObjectToHashMap(JSONObject data) throws JSONException {
-    HashMap<String, Object> map = new HashMap();
+    HashMap<String, Object> map = new HashMap<String,Object>();
     Iterator iterator = data.keys();
     while (iterator.hasNext()) {
       String key = iterator.next().toString();
