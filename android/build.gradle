@@ -32,6 +32,10 @@ android {
     }
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked" << "-Werror"
+}
+
 dependencies {
     api 'io.hyphenate:ease-call-kit:3.8.3'
 }
