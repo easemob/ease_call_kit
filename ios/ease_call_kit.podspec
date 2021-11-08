@@ -16,14 +16,14 @@ A new flutter plugin project.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.platform = :ios, '8.0'
-
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-  s.dependency 'EaseCallKit', '3.8.1.1'
+  s.platform = :ios, '9.0'
+  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386 arm64' }
+  s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386 arm64' }
+  s.dependency 'EaseCallKit', '3.8.7.2'
   s.dependency 'AgoraRtcEngine_iOS', '3.4.6'
   s.dependency 'Masonry'
   s.dependency 'SDWebImage'
   s.dependency 'HyphenateChat', '~>3.8.3.1'
   s.dependency 'MBProgressHUD'
-  
+
 end

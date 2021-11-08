@@ -1,8 +1,13 @@
 import 'dart:collection';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:ease_call_kit/ease_call_kit.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert' as convert;
 
+const String appkey = "easemob-demo#easeim";
+const String emUsername = "du001";
 void main() {
   runApp(MyApp());
 }
@@ -24,7 +29,6 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
     Map<String, EaseCallUser> userMap = HashMap();
     userMap[agoraUserId] = aUser;
     config.userMap = userMap;
-    config.callTimeOut = 30 * 30 * 1000;
 
     EaseCallKit.initWithConfig(config);
     EaseCallKit.listener = this;
@@ -43,25 +47,25 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
           child: Center(
             child: Column(
               children: [
-                FlatButton(
+                TextButton(
                   child: Text('1v1音频'),
                   onPressed: () {
                     EaseCallKit.startSingleCall(
-                      'liu002',
+                      'du002',
                       callType: EaseCallType.SingeAudio,
                     );
                   },
                 ),
-                FlatButton(
+                TextButton(
                   child: Text('1v1视频'),
                   onPressed: () {
                     EaseCallKit.startSingleCall(
-                      'liu002',
+                      'du002',
                       callType: EaseCallType.SingeVideo,
                     );
                   },
                 ),
-                FlatButton(
+                TextButton(
                   child: Text('多人'),
                   onPressed: () {
                     Map<String, String> ext = HashMap();
@@ -89,42 +93,81 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
   @override
   void callDidEnd(String channelName, EaseCallEndReason reason, int time,
       EaseCallType callType) {
-    print(
-      '[callDidEnd] channelName --$channelName, reason -- $reason, time -- $time, callType -- $callType',
+    debugPrint(
+      "callDidEnd channelName: $channelName, reason: $reason, time: $time",
+    );
+  }
+
+  @override
+  void callDidJoinChannel(String channelName, int uid) {
+    debugPrint(
+      "callDidJoinChannel channelName: $channelName, uid: $uid",
     );
   }
 
   @override
   void callDidOccurError(EaseCallError error) {
-    print(
-      '[callDidOccurError] --$error',
+    debugPrint(
+      "callDidOccurError: $error",
     );
   }
 
   @override
-  void callDidReceive(EaseCallType callType, String inviter, Map ext) {
-    print(
-      'callDidReceive callType --$callType, inviter -- $inviter, ext -- $ext',
+  void callDidReceive(EaseCallType callType, String inviter, Map? ext) {
+    debugPrint(
+      "callDidReceive callType: $callType, inviter: $inviter, ext: $ext",
     );
   }
 
   @override
   void callDidRequestRTCToken(
-      String appId, String channelName, String account) {
-    print(
-      '[callDidRequestRTCToken] appId --$appId, channelName -- $channelName, account -- $account',
+      String appId, String channelName, String eid, int uid) async {
+    debugPrint(
+      "callDidRequestRTCToken appId: $appId, channelName: $channelName, eid: $eid, uid: $uid",
     );
+    // String? rtcToken =
+    await fetchRTCToken(channelName, emUsername);
+  }
 
-    EaseCallKit.getRTCToken(
-      channelName,
-      appId,
+  @override
+  void multiCallDidInviting(List<String?> excludeUsers, Map? ext) {
+    debugPrint(
+      "multiCallDidInviting excludeUsers: $excludeUsers, ext: $ext",
     );
   }
 
   @override
-  void multiCallDidInviting(List<String> excludeUsers, Map ext) {
-    print(
-      '[multiCallDidInviting] excludeUsers--$excludeUsers, ext -- $ext',
+  void remoteUserDidJoinChannel(String channelName, int uid, String eid) {
+    debugPrint(
+      "remoteUserDidJoinChannel channelName: $channelName, uid: $uid, eid: $eid",
     );
+  }
+
+  Future<String?> fetchRTCToken(String channelName, String username) async {
+    String? token = await EaseCallKit.getTestUserToken();
+    if (token == null) return null;
+    var httpClient = new HttpClient();
+    var uri = Uri.http("a1.easemob.com", "/token/rtcToken/v1", {
+      "userAccount": username,
+      "channelName": channelName,
+      "appkey": appkey,
+    });
+    var request = await httpClient.getUrl(uri);
+    request.headers.add("Authorization", "Bearer $token");
+    HttpClientResponse response = await request.close();
+    httpClient.close();
+    if (response.statusCode == HttpStatus.ok) {
+      var _content = await response.transform(Utf8Decoder()).join();
+      debugPrint(_content);
+      Map<String, dynamic>? map = convert.jsonDecode(_content);
+      if (map != null) {
+        if (map["code"] == "RES_0K") {
+          debugPrint("获取数据成功: $map");
+          String rtcToken = map["accessToken"];
+          int agoraUserId = map["agoraUserId"];
+          await EaseCallKit.setRTCToken(rtcToken, channelName, agoraUserId);
+        }
+      }
+    }
   }
 }

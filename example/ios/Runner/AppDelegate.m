@@ -18,8 +18,8 @@ dispatch_async(dispatch_get_main_queue(), block);\
     
     [self initHypheanteSDK];
     
-    NSString *userName = @"liu001";
-    NSString *password = @"12345678";
+    NSString *userName = @"du001";
+    NSString *password = @"1";
 
     [EMClient.sharedClient loginWithUsername:userName password:password];
     [GeneratedPluginRegistrant registerWithRegistry:self];
