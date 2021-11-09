@@ -84,18 +84,18 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
   }
 
   @override
-	/// 通话结束时触发该回调 
-	/// channelName 通话的通道名称，用于在声网水晶球查询通话质量 
-	/// reason 通话结束原因 time 通话时长 
-	/// callType 通话类型，EaseCallTypeAudio为语音通话，EaseCallTypeVideo为视频通话，EaseCallTypeMulti为多人通话
+  /// 通话结束时触发该回调 
+  /// channelName 通话的通道名称，用于在声网水晶球查询通话质量 
+  /// reason 通话结束原因 time 通话时长 
+  /// callType 通话类型，EaseCallTypeAudio为语音通话，EaseCallTypeVideo为视频通话，EaseCallTypeMulti为多人通话
   void callDidEnd(String channelName, EaseCallEndReason reason, int time,
       EaseCallType callType) {
   }
 
-	@override
-	/// 通话中自己加入会议成功时触发该回调 
-  ///	channelName 呼叫使用的频道名称 
-	/// uid 声网账户
+  @override
+  /// 通话中自己加入会议成功时触发该回调 
+  /// channelName 呼叫使用的频道名称 
+  /// uid 声网账户
   void callDidJoinChannel(String channelName, int uid) {
     debugPrint(
       "callDidJoinChannel channelName: $channelName, uid: $uid",
@@ -103,25 +103,25 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
   }
   
   @override
-	/// 通话过程发生异常时，触发该回调 
-	/// error 错误信息
+  /// 通话过程发生异常时，触发该回调 
+  /// error 错误信息
   void callDidOccurError(EaseCallError error) {
   }
 
   @override
   /// 被叫开始振铃时，触发该回调
-	/// 被叫开始振铃时，触发该回调 
-	///	callType 通话类型 
-	///	inviter 主叫的环信id 
-	/// ext 邀请中的扩展信息
+  /// 被叫开始振铃时，触发该回调 
+  /// callType 通话类型 
+  /// inviter 主叫的环信id 
+  /// ext 邀请中的扩展信息
   void callDidReceive(EaseCallType callType, String inviter, Map ext) {
   }
 
   @override
-	/// 加入音视频通话频道前触发该回调，用户需要在触发该回调后， 主动从AppServer获取声网token，然后调用EaseCallKit#setRTCToken方法将token设置进来 
-	/// appId 声网通话使用的appId 
-	/// channelName 呼叫使用的频道名称 
-	/// eid 当前登录的环信id
+  /// 加入音视频通话频道前触发该回调，用户需要在触发该回调后， 主动从AppServer获取声网token，然后调用EaseCallKit#setRTCToken方法将token设置进来 
+  /// appId 声网通话使用的appId 
+  /// channelName 呼叫使用的频道名称 
+  /// eid 当前登录的环信id
   void callDidRequestRTCToken(String appId, String channelName, String eid) async {
   }
 
