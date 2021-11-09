@@ -158,9 +158,9 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     });
   }
 
-  // TODO:
+  // TODO: 不能reset，获取感觉也没啥用是否需要提供?
   private void getEaseCallConfig(JSONObject map, Result result) {
-
+      EaseCallKitConfig config = EaseCallKit.getInstance().getCallKitConfig();
   }
 
   private void setRTCToken(JSONObject map, final Result result) throws JSONException {

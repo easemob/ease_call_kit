@@ -75,6 +75,7 @@ class EaseCallKit {
     return await _channel.invokeMethod('startInviteUsers', req);
   }
 
+/*
   // 获取EaseCallKit的配置
   static Future<EaseCallConfig> getEaseCallConfig() async {
     Map result = await _channel.invokeMethod("getEaseCallConfig");
@@ -91,6 +92,7 @@ class EaseCallKit {
       enableRTCTokenValidate: enableRTCTokenValidate,
     );
   }
+  */
 
   /// 设置声网频道及token
   /// `token` 声网token
