@@ -23,10 +23,7 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
   void initState() {
     super.initState();
 
-    EaseCallConfig config =
-        EaseCallConfig(agoraAppId, enableRTCTokenValidate: true);
-
-    EaseCallKit.initWithConfig(config);
+    EaseCallKit.initWithConfig(EaseCallConfig(agoraAppId));
     EaseCallKit.listener = this;
   }
 

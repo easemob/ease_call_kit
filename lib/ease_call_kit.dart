@@ -327,7 +327,7 @@ class EaseCallConfig {
   /// 声网AppId
   final String agoraAppId;
 
-  /// 是否开启声网token验证，默认不开启，开启后必须实现callDidRequestRTCToken回调，并在收到回调后调用setRTCToken才能进行通话
+  /// 是否开启声网token验证，默认开启，开启后必须实现callDidRequestRTCToken回调，并在收到回调后调用setRTCToken才能进行通话
   final bool enableRTCTokenValidate;
 
   /// 默认头像本地路径, 当收到未设置头像用户的呼叫时将展示默认头像。
@@ -344,7 +344,7 @@ class EaseCallConfig {
 
   /// 初始化Config,
   /// `agoraAppId` 声网AppId，必填，需要从声网申请。
-  /// `enableRTCTokenValidate` 是否开启声网Token验证, 默认为false，开启后，
+  /// `enableRTCTokenValidate` 是否开启声网Token验证, 默认为true，开启后，
   /// 需要实现`EaseCallKitListener#callDidRequestRTCToken`回调，在收到回调时根据需要取声网请求token，之后调用
   /// `EaseCallKit#setRTCToken` 方法将RTCToken提供给callkit，之后才能进行通话。
   /// `callTimeOut` 呼叫超时时间。
@@ -352,7 +352,7 @@ class EaseCallConfig {
   /// `ringFileURL` 铃声文件路径。
   EaseCallConfig(
     this.agoraAppId, {
-    this.enableRTCTokenValidate = false,
+    this.enableRTCTokenValidate = true,
     this.callTimeOut = 30,
     this.defaultHeadImageURL,
     this.ringFileURL,
