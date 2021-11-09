@@ -65,17 +65,15 @@ dispatch_async(dispatch_get_main_queue(), block);\
     [[EaseCallManager sharedManager] startSingleCallWithUId:emId
                                                        type:type
                                                         ext:ext
-                                                 completion:^(NSString * _Nonnull callId, EaseCallError * error)
+                                                 completion:^(NSString * _Nonnull callId, EaseCallError * aError)
      {
-        NSMutableDictionary *ret = [NSMutableDictionary dictionary];
-        if (error) {
-            ret[@"error"] = [error toJson];
+        if (aError) {
+            [self callDidOccurError:error];
         }
-        ret[@"call_id"] = callId;
-        ease_call_dispatch_main_async_safe(^(){
-            result(ret);
-        });
     }];
+    ease_call_dispatch_main_async_safe(^(){
+        result(nil);
+    });
 }
 
 - (void)startInviteUsers:(NSDictionary *)dict result:(FlutterResult)result{
@@ -85,14 +83,14 @@ dispatch_async(dispatch_get_main_queue(), block);\
                                                 ext:ext
                                          completion:^(NSString * _Nullable callId, EaseCallError * _Nullable aError)
      {
-        NSMutableDictionary *ret = [NSMutableDictionary dictionary];
         if (aError) {
-            ret[@"error"] = [aError toJson];
+            [self callDidOccurError:error];
         }
-        ease_call_dispatch_main_async_safe(^(){
-            result(ret);
-        });
     }];
+    
+    ease_call_dispatch_main_async_safe(^(){
+        result(ret);
+    });
 }
 
 - (void)getEaseCallConfig:(NSDictionary *)dict result:(FlutterResult)result{
@@ -114,7 +112,11 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 
 - (void)setUsersMapper:(NSDictionary *)dict result:(FlutterResult)result {
-    NSDictionary *userMap = dict[@"map"];
+    NSDictionary *receiveMap = dict[@"map"];
+    NSMutableDictionary *userMap = [NSMutableDictionary dictionary];
+    for (NSString username in receiveMap.allKeys) {
+        userMap[receiveMap[username]] = username;
+    }
     NSString *channelName = dict[@"channel_name"];
     [EaseCallManager.sharedManager setUsers:userMap channelName:channelName];
     ease_call_dispatch_main_async_safe(^(){
@@ -126,7 +128,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
     EaseCallConfig *config =  EaseCallManager.sharedManager.getEaseCallConfig;
     if(config != nil) {
         NSMutableDictionary *usersDict = [NSMutableDictionary dictionary];
-        NSArray *usersList = dict[@"user_map"];
+        NSArray *usersList = dict[@"userInfo_list"];
         for (NSDictionary *userDict in usersList) {
             NSString *key = userDict[@"key"];
             NSDictionary *value = userDict[@"value"];
@@ -156,7 +158,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
 
 - (void)callDidOccurError:(EaseCallError * _Nonnull)aError
 {
-    [self.channel invokeMethod:@"callDidOccurError" arguments:[self errorToDict:aError]];
+    [self.channel invokeMethod:@"callDidOccurError" arguments:[aError toJson]];
 }
 
 - (void)callDidReceive:(EaseCallType)aType
@@ -190,8 +192,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
     arg[@"app_id"] = aAppId;
     arg[@"channel_name"] = aChannelName;
     arg[@"account"] = aUserAccount;
-    arg[@"agora_uid"] = @(aAgoraUid);
-    
+      
     [self.channel invokeMethod:@"callDidRequestRTCToken" arguments:arg];
 }
 
@@ -212,70 +213,10 @@ dispatch_async(dispatch_get_main_queue(), block);\
 }
 
 
-
-//
-//
-//- (void)setUserWithUserName:(NSString *)userName completion:(void (^)(void))completion {
-//    [[EMClient sharedClient].userInfoManager fetchUserInfoById:@[userName] completion:^(NSDictionary *aUserDatas, EMError *aError) {
-//        EMUserInfo* info = aUserDatas[userName];
-//        if(info) {
-//            EaseCallUser* user = [EaseCallUser userWithNickName:info.nickName image:[NSURL URLWithString:info.avatarUrl]];
-//
-//            ease_call_dispatch_main_async_safe(^(){
-//                [[[EaseCallManager sharedManager] getEaseCallConfig] setUser:userName info:user];
-//                if (completion) {
-//                    completion();
-//                }
-//            });
-//
-//        }
-//    }];
-//}
-//
-//- (void)fetchUserMapsFromServerWithChannelName:(NSString*)aChannelName
-//{
-//    // 这里设置映射表，设置头像，昵称
-//    NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
-//    NSURLSession *session = [NSURLSession sessionWithConfiguration:config
-//                                                          delegate:nil
-//                                                     delegateQueue:[NSOperationQueue mainQueue]];
-//
-//    NSString* strUrl = [NSString stringWithFormat:@"http://a1.easemob.com/channel/mapper?userAccount=%@&channelName=%@&appkey=%@",[EMClient sharedClient].currentUsername,aChannelName,[EMClient sharedClient].options.appkey];
-//    NSString*utf8Url = [strUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLFragmentAllowedCharacterSet]];
-//    NSURL* url = [NSURL URLWithString:utf8Url];
-//    NSMutableURLRequest* urlReq = [[NSMutableURLRequest alloc] initWithURL:url];
-//    [urlReq setValue:[NSString stringWithFormat:@"Bearer %@",[EMClient sharedClient].accessUserToken ] forHTTPHeaderField:@"Authorization"];
-//    NSURLSessionDataTask *task = [session dataTaskWithRequest:urlReq completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-//        if(data) {
-//            NSDictionary* body = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
-//            NSLog(@"%s mapperBody:%@",__func__,body);
-//
-//            if(body) {
-//                NSString* resCode = [body objectForKey:@"code"];
-//                if([resCode isEqualToString:@"RES_0K"]) {
-//                    NSString* channelName = [body objectForKey:@"channelName"];
-//                    NSDictionary* result = [body objectForKey:@"result"];
-//                    NSMutableDictionary<NSNumber*,NSString*>* users = [NSMutableDictionary dictionary];
-//                    for (NSString* strId in result) {
-//                        NSString* username = [result objectForKey:strId];
-//                        NSNumber* uId = [NSNumber numberWithInteger:[strId integerValue]];
-//                        [users setObject:username forKey:uId];
-//                        [self setUserWithUserName:username completion:nil];
-//                    }
-//                    [[EaseCallManager sharedManager] setUsers:users channelName:channelName];
-//                }
-//            }
-//        }
-//    }];
-//
-//    [task resume];
-//}
-
-
 #pragma mark private method
 
 - (int)callTypeToInt:(EaseCallType)aType {
-    int type = 0;
+    int type = 1;
     switch (aType) {
         case EaseCallType1v1Audio:
             type = 1;
@@ -293,7 +234,7 @@ dispatch_async(dispatch_get_main_queue(), block);\
 }
 
 - (int)reasonToInt:(EaseCallEndReason)aReason{
-    int reason = 0;
+    int reason = 1;
     switch (aReason) {
         case EaseCallEndReasonHangup:
             reason = 1;
@@ -334,26 +275,11 @@ dispatch_async(dispatch_get_main_queue(), block);\
     return reason;
 }
 
-- (NSDictionary *)errorToDict:(EaseCallError *)aError{
-    NSMutableDictionary *ret = [NSMutableDictionary dictionary];
-    if (aError.aErrorType == EaseCallErrorTypeProcess) {
-        ret[@"err_type"] = @(1);
-    }else if (aError.aErrorType == EaseCallErrorTypeRTC) {
-        ret[@"err_type"] = @(2);
-    }else {
-        ret[@"err_type"] = @(3);
-    }
-    
-    ret[@"err_code"] = @(aError.errCode);
-    ret[@"err_desc"] = aError.errDescription;
-    
-    return ret;
-}
-
 
 @end
 
 @implementation EaseCallError (Flutter)
+
 - (NSDictionary *)toJson {
     NSMutableDictionary *ret = [NSMutableDictionary dictionary];
     ret[@"err_code"] = @(self.errCode);
@@ -362,9 +288,9 @@ dispatch_async(dispatch_get_main_queue(), block);\
         int type = 0;
         if (self.aErrorType == EaseCallErrorTypeProcess) {
             type = 1;
-        }else if(self.aErrorType == EaseCallErrorTypeRTC){
+        }else if(self.aErrorType == EaseCallErrorTypeRTC) {
             type = 2;
-        }else if(self.aErrorType == EaseCallErrorTypeIM){
+        }else (self.aErrorType == EaseCallErrorTypeIM) {
             type = 3;
         }
         @(type);

@@ -20,7 +20,7 @@ public class MainActivity extends FlutterActivity {
         emOptions.setAppKey("easemob-demo#easeim");
         EMClient.getInstance().init(this.getApplicationContext(), emOptions);
 
-        EMClient.getInstance().login("liu001", "12345678", new EMCallBack() {
+        EMClient.getInstance().login("du001", "1", new EMCallBack() {
             @Override
             public void onSuccess() {
                 String loginUserName = EMClient.getInstance().getCurrentUser();

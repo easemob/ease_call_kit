@@ -14,9 +14,18 @@ class EaseCallKit {
     _addListener();
     Map<String, dynamic> req = {};
     req['agora_app_id'] = config.agoraAppId;
-    req['default_head_image_url'] = config.defaultHeadImageURL;
-    req['call_timeout'] = config.callTimeOut;
-    req['ring_file_url'] = config.ringFileURL;
+    if (config.defaultHeadImageURL != null) {
+      req['default_head_image_url'] = config.defaultHeadImageURL;
+    }
+
+    if (config.ringFileURL != null) {
+      req['ring_file_url'] = config.ringFileURL;
+    }
+
+    if (config.callTimeOut > 0) {
+      req['call_timeout'] = config.callTimeOut;
+    }
+
     req['enable_rtc_token_validate'] = config.enableRTCTokenValidate;
     List? userList = config.userMap?.keys
         .map(
@@ -36,7 +45,7 @@ class EaseCallKit {
   /// `emId`,  被邀请人的环信ID
   /// `callType`, 通话类型，[EaseCallType.SingeAudio]或[EaseCallType.SingeAudio]
   /// `ext`, 扩展信息
-  static Future<String?> startSingleCall(
+  static Future<void> startSingleCall(
     String emId, {
     EaseCallType callType = EaseCallType.SingeAudio,
     Map? ext,
@@ -47,17 +56,7 @@ class EaseCallKit {
     if (ext != null) {
       req['ext'] = ext;
     }
-
-    Map result = await _channel.invokeMethod('startSingleCall', req);
-    String? callId;
-    if (result['error'] != null) {
-      try {
-        throw (EaseCallError.fromJson(result['error']));
-      } on Exception {}
-    } else {
-      callId = result['call_id'];
-    }
-    return callId;
+    return await _channel.invokeMethod('startSingleCall', req);
   }
 
   /// 邀请成员进行多人会议
@@ -73,14 +72,7 @@ class EaseCallKit {
       req['ext'] = ext;
     }
 
-    Map result = await _channel.invokeMethod('startInviteUsers', req);
-
-    if (result.containsKey("error")) {
-      try {
-        throw (EaseCallError.fromJson(result['error']));
-      } on Exception {}
-    }
-    return;
+    return await _channel.invokeMethod('startInviteUsers', req);
   }
 
   // 获取EaseCallKit的配置
@@ -130,23 +122,24 @@ class EaseCallKit {
         )
         .toList();
     if (userList != null) {
-      req['user_map'] = userList;
+      req['userInfo_list'] = userList;
     }
 
     return await _channel.invokeMethod("setUserInfoMapper", req);
   }
 
+  /*
   /// 设置声网uid和环信eid的映射表
   /// `aUserMapper` 声网账户与环信id的映射表
   /// `channelName` 对应的频道名称
   static Future<void> setUsersMapper(
-      Map<int, String> aUserMapper, String channelName) async {
+      Map<String, int> aUserMapper, String channelName) async {
     Map req = {};
     req["map"] = aUserMapper;
     req["channel_name"] = channelName;
     return await _channel.invokeMethod("setUsersMapper", req);
   }
-
+  */
   static void _addListener() {
     _channel.setMethodCallHandler((MethodCall call) async {
       Map argMap = call.arguments;
@@ -177,22 +170,28 @@ class EaseCallKit {
           EaseCallError.fromJson(argMap),
         );
       } else if (call.method == 'multiCallDidInviting') {
-        List<String?> excludeUsers = argMap['exclude_users'] as List<String?>;
+        List? excludeUsers = argMap['exclude_users'];
+        List<String?> list = [];
+        if (excludeUsers != null) {
+          for (var item in excludeUsers) {
+            if (item is String) {
+              list.add(item);
+            }
+          }
+        }
         Map? ext = argMap['ext'];
         _listener?.multiCallDidInviting(
-          excludeUsers,
+          list,
           ext,
         );
       } else if (call.method == 'callDidRequestRTCToken') {
         String appId = argMap['app_id'];
         String channelName = argMap['channel_name'];
         String account = argMap['account'];
-        int agoraUId = argMap["agora_uid"];
         _listener?.callDidRequestRTCToken(
           appId,
           channelName,
           account,
-          agoraUId,
         );
       } else if (call.method == "callDidJoinChannel") {
         String channelName = argMap["channel_name"];
@@ -263,12 +262,10 @@ abstract class EaseCallKitListener {
   /// `appId` 声网通话使用的appId
   /// `channelName` 呼叫使用的频道名称
   /// `eid` 当前登录的环信id
-  /// `uid` 声网账户, 未使用，目前建议该uid由您的服务器生成。
   void callDidRequestRTCToken(
     String appId,
     String channelName,
     String eid,
-    int uid,
   );
 
   /// 多人通话中，点击邀请按钮触发该回调
@@ -332,10 +329,10 @@ class EaseCallConfig {
   final bool enableRTCTokenValidate;
 
   /// 默认头像本地路径, 当收到未设置头像用户的呼叫时将展示默认头像。
-  final String defaultHeadImageURL;
+  final String? defaultHeadImageURL;
 
   /// 铃声本地路径
-  final String ringFileURL;
+  final String? ringFileURL;
 
   /// 超时时间
   late int callTimeOut = 30;
@@ -355,8 +352,8 @@ class EaseCallConfig {
     this.agoraAppId, {
     this.enableRTCTokenValidate = false,
     this.callTimeOut = 30,
-    this.defaultHeadImageURL = '',
-    this.ringFileURL = '',
+    this.defaultHeadImageURL,
+    this.ringFileURL,
   });
 }
 

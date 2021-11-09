@@ -8,6 +8,7 @@ import 'dart:convert' as convert;
 
 const String appkey = "easemob-demo#easeim";
 const String emUsername = "du001";
+const agoraAppId = "15cb0d28b87b425ea613fc46f7c9f974";
 void main() {
   runApp(MyApp());
 }
@@ -21,19 +22,12 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
   @override
   void initState() {
     super.initState();
-    // var config = EaseCallConfig('15cb0d28b87b425ea613fc46f7c9f974');
-    String agoraUserId = "15cb0d28b87b425ea613fc46f7c9f974";
+
     EaseCallConfig config =
-        EaseCallConfig(agoraUserId, enableRTCTokenValidate: true);
-    EaseCallUser aUser = EaseCallUser("liu001昵称");
-    Map<String, EaseCallUser> userMap = HashMap();
-    userMap[agoraUserId] = aUser;
-    config.userMap = userMap;
+        EaseCallConfig(agoraAppId, enableRTCTokenValidate: true);
 
     EaseCallKit.initWithConfig(config);
     EaseCallKit.listener = this;
-
-    print('initState agoraUserId:$agoraUserId userMap:$userMap');
   }
 
   @override
@@ -121,9 +115,9 @@ class _MyAppState extends State<MyApp> with EaseCallKitListener {
 
   @override
   void callDidRequestRTCToken(
-      String appId, String channelName, String eid, int uid) async {
+      String appId, String channelName, String eid) async {
     debugPrint(
-      "callDidRequestRTCToken appId: $appId, channelName: $channelName, eid: $eid, uid: $uid",
+      "callDidRequestRTCToken appId: $appId, channelName: $channelName, eid: $eid",
     );
     // String? rtcToken =
     await fetchRTCToken(channelName, emUsername);

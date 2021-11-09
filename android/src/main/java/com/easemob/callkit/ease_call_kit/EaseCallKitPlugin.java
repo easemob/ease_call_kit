@@ -55,16 +55,18 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
 
   private MethodChannel channel;
-  private boolean enableRTCTokenValidate = false;
   private FlutterPluginBinding binding;
-  private Result result;
   private WeakReference<EaseCallKitTokenCallback> weakCallback;
+  private Map<String, EaseCallKitTokenCallback> tokenCallbackMap;
+  private Map<String, EaseGetUserAccountCallback> userAccountCallbackMap;
+
   private EaseCallKitListener callKitListener;
 
-  private String tokenUrl = "http://a1.easemob.com/token/rtcToken/v1";
-  private String uIdUrl = "http://a1.easemob.com/channel/mapper";
+  static final Handler handler = new Handler(Looper.getMainLooper());
 
-
+  public void post(Runnable runnable) {
+    handler.post(runnable);
+  }
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -77,7 +79,10 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
 
-    JSONObject param = new JSONObject((Map) call.arguments);
+    JSONObject param = null;
+    if (call.arguments != null) {
+      param = new JSONObject((Map) call.arguments);
+    }
     try {
       if (call.method.equals("initCallKit")) {
         initWithConfig(param, result);
@@ -89,6 +94,16 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
         getEaseCallConfig(param, result);
       } else if (call.method.equals("setRTCToken")) {
         setRTCToken(param, result);
+      } else if (call.method.equals("setUsersMapper")){
+        setUsersMapper(param, result);
+      } else if (call.method.equals("setUserInfoMapper")){
+        setUserInfoMapper(param, result);
+      } else if (call.method.equals("getTestUserToken")){
+        if (EMClient.getInstance().getAccessToken().length() > 0) {
+          result.success(EMClient.getInstance().getAccessToken());
+        }else {
+          result.success(null);
+        }
       } else {
         result.notImplemented();
       }
@@ -98,94 +113,196 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private void initWithConfig(JSONObject map, final Result result) throws JSONException {
-
     EaseCallKit.getInstance().init(this.binding.getApplicationContext(), configFromJson(map));
-    final Map<String, Object> data = new HashMap<>();
-    setEaseCallKitUserInfo(EMClient.getInstance().getCurrentUser());
-    result.success(data);
-
+    post(new Runnable() {
+      @Override
+      public void run() {
+        result.success(null);
+      }
+    });
   }
 
 
-  private void startSingleCall(JSONObject map, Result result) throws JSONException {
-    int callType = map.getInt("call_type");
+  private void startSingleCall(JSONObject map, final Result result) throws JSONException {
+    EaseCallType callType = map.getInt("call_type") == 0 ? EaseCallType.SINGLE_VOICE_CALL : EaseCallType.SINGLE_VIDEO_CALL;
     String user = map.getString("em_id");
-    Map<String,Object> ext = JsonObjectToHashMap(map.getJSONObject("ext"));
-
-    EaseCallKit.getInstance()
-        .startSingleCall(callType == 0 ? EaseCallType.SINGLE_VOICE_CALL : EaseCallType.SINGLE_VIDEO_CALL, user, ext);
-    this.result = result;
+    Map<String,Object> ext = null;
+    if (map.has("ext")){
+      ext = JsonObjectToHashMap(map.getJSONObject("ext"));
+    }
+    EaseCallKit.getInstance().startSingleCall(callType, user, ext);
+    post(new Runnable() {
+      @Override
+      public void run() {
+        result.success(null);
+      }
+    });
   }
 
-  private void startInviteUsers(JSONObject map, Result result) throws JSONException {
+  private void startInviteUsers(JSONObject map, final Result result) throws JSONException {
     JSONArray usersArray = map.getJSONArray("users");
     String[] users = new String[usersArray.length()];
     for (int i = 0; i < usersArray.length(); i++) {
       users[i] = (String) usersArray.get(i);
     }
-    Map<String,Object> ext = JsonObjectToHashMap(map.getJSONObject("ext"));
+    Map<String,Object> ext = null;
+    if (map.has("ext")){
+      ext = JsonObjectToHashMap(map.getJSONObject("ext"));
+    }
     EaseCallKit.getInstance().startInviteMultipleCall(users, ext);
-    this.result = result;
-
+    post(new Runnable() {
+      @Override
+      public void run() {
+        result.success(null);
+      }
+    });
   }
 
+  // TODO:
   private void getEaseCallConfig(JSONObject map, Result result) {
 
   }
 
-  private void setRTCToken(JSONObject map, Result result) throws JSONException {
+  private void setRTCToken(JSONObject map, final Result result) throws JSONException {
     String rtcToken = map.getString("rtc_token");
     String channelName = map.getString("channel_name");
-    if (this.weakCallback.get() != null) {
-      this.weakCallback.get().onSetToken(rtcToken,1);
+    Integer uid = map.getInt("uid");
+    if (tokenCallbackMap.containsKey(channelName)) {
+       EaseCallKitTokenCallback callback = tokenCallbackMap.get(channelName);
+       callback.onSetToken(rtcToken, uid);
+       tokenCallbackMap.remove(callback);
+    }else{
+        // ??
     }
+    // 是否需要根据onSetToken/onGetTokenError分别返回？
+    post(new Runnable() {
+      @Override
+      public void run() {
+        result.success(null);
+      }
+    });
   }
 
+
+  private void setUsersMapper(JSONObject map, final Result result) throws JSONException {
+    JSONObject userMap = map.getJSONObject("map");
+    String channelName = map.getString("channel_name");
+    if(userAccountCallbackMap.containsKey(channelName)) {
+        EaseGetUserAccountCallback callback = userAccountCallbackMap.get(channelName);
+        List<EaseUserAccount> list = new ArrayList<>();
+      Iterator<String> it = userMap.keys();
+      while(it.hasNext()){
+        String key = it.next();
+        int value = userMap.getInt(key);
+        EaseUserAccount account = new EaseUserAccount(value, key);
+        list.add(account);
+      }
+      callback.onUserAccount(list);
+      userAccountCallbackMap.remove(callback);
+    }else {
+      // ??
+    }
+    post(new Runnable() {
+      @Override
+      public void run() {
+        result.success(null);
+      }
+    });
+  }
+
+  private void setUserInfoMapper(JSONObject map, final Result result) throws JSONException {
+    JSONArray userInfoList = map.getJSONArray("userInfo_list");
+    Map<String, EaseCallUserInfo> userMap = new HashMap<>();
+    for (int i = 0; i < userInfoList.length(); i++) {
+      JSONObject userJsonObj = userInfoList.getJSONObject(i);
+      String username = userJsonObj.getString("key");
+      JSONObject accountJsonObj = userJsonObj.getJSONObject("value");
+      String avatarUrl = null;
+      if (accountJsonObj.has("avatar_url")) {
+        avatarUrl = accountJsonObj.getString("avatar_url");
+      }
+      String nickname = null;
+      if (accountJsonObj.has("nickname")) {
+        nickname = accountJsonObj.getString("nickname");
+      }
+      userMap.put(username, new EaseCallUserInfo(nickname, avatarUrl));
+    }
+
+    EaseCallKitConfig config = EaseCallKit.getInstance().getCallKitConfig();
+    config.setUserInfoMap(userMap);
+    post(new Runnable() {
+      @Override
+      public void run() {
+        result.success(null);
+      }
+    });
+  }
 
   private void addCallKitListener() {
     callKitListener = new EaseCallKitListener() {
       @Override
       public void onInviteUsers(Context context, String userId[], JSONObject ext) {
         Map<String, Object> data = new HashMap<>();
-        data.put("exclude_users", userId);
-        data.put("ext", ext);
-        channel.invokeMethod("multiCallDidInviting", data);
+        List<String> users = new ArrayList<>();
+        for (int i = 0; i < userId.length; i++) {
+          users.add(userId[i]);
+        }
+        data.put("exclude_users", users);
 
+        Map<String, Object> extMap = null;
+          try{
+            if (ext != null) {
+              extMap = JsonObjectToHashMap(ext);
+            }
+          }catch(JSONException e) {
+          }finally {
+            if (extMap != null) {
+              data.put("ext", extMap);
+            }
+            channel.invokeMethod("multiCallDidInviting", data);
+          }
       }
 
       @Override
       public void onEndCallWithReason(EaseCallType callType, String channelName, EaseCallEndReason reason,
           long callTime) {
-        Map<String, Object> data = new HashMap<>();
+        final Map<String, Object> data = new HashMap<>();
         data.put("channel_name", channelName);
         data.put("time", callTime);
         data.put("call_type", callTypeToInt(callType));
         data.put("reason", reasonToInt(reason));
-        channel.invokeMethod("callDidEnd", data);
+        post(new Runnable() {
+          @Override
+          public void run() {
+            channel.invokeMethod("callDidEnd", data);
+          }
+        });
       }
 
       @Override
-      public void onGenerateToken(String userId, String channelName, String appKey, EaseCallKitTokenCallback callback) {
+      public void onGenerateToken(String userId, String channelName, String agoraAppId, EaseCallKitTokenCallback callback) {
 
-        EMLog.d("onGenerateToken","onGenerateToken userId:" + userId + " channelName:" + channelName + " appKey:"+ appKey);
-        String url = tokenUrl;
-        url += "?";
-        url += "userAccount=";
-        url += userId;
-        url += "&channelName=";
-        url += channelName;
-        url += "&appkey=";
-        url +=  appKey;
+        if (tokenCallbackMap == null) {
+          tokenCallbackMap = new HashMap<>();
+        }
+        tokenCallbackMap.put(channelName, callback);
+        final Map<String, Object> data = new HashMap<>();
+        data.put("app_id", agoraAppId);
+        data.put("channel_name", channelName);
+        data.put("account", userId);
 
-        //获取声网Token
-        getRtcToken(url, callback);
-
+        post(new Runnable() {
+          @Override
+          public void run() {
+            channel.invokeMethod("callDidRequestRTCToken", data);
+          }
+        });
       }
 
 
       @Override
       public void onReceivedCall(EaseCallType callType, String fromUserId, JSONObject ext)  {
-        Map<String, Object> data = new HashMap<>();
+        final Map<String, Object> data = new HashMap<>();
         data.put("call_type", callTypeToInt(callType));
         data.put("inviter", fromUserId);
 
@@ -194,17 +311,18 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
           data.put("ext", jsonString);
         }
 
-        //收到接听电话
-        Log.e("onRecivedCall","onRecivedCall" + callType.name() + " fromUserId:" + fromUserId);
-        channel.invokeMethod("callDidReceive", data);
-
+        post(new Runnable() {
+          @Override
+          public void run() {
+            channel.invokeMethod("callDidReceive", data);
+          }
+        });
       }
-
-
 
       @Override
       public void onCallError(EaseCallKit.EaseCallError type, int errorCode, String description) {
-        Map<String, Object> data = new HashMap<>();
+
+        final Map<String, Object> data = new HashMap<>();
         int intType = 0;
         if (type == EaseCallKit.EaseCallError.PROCESS_ERROR) {
           intType = 1;
@@ -216,193 +334,46 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
         data.put("err_type", intType);
         data.put("err_code", errorCode);
         data.put("err_desc", description);
-        channel.invokeMethod("callDidOccurError", data);
-      }
 
-      @Override
-      public void onInViteCallMessageSent() {
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
+        post(new Runnable() {
           @Override
           public void run() {
-            if (result != null) {
-              Map<String, Object> data = new HashMap<>();
-              result.success(data);
-              result = null;
-            }
+            channel.invokeMethod("callDidOccurError", data);
           }
         });
       }
 
       @Override
+      public void onInViteCallMessageSent() {
+
+      }
+
+      @Override
       public void onRemoteUserJoinChannel(String channelName, String userName, int uid, EaseGetUserAccountCallback callback) {
-        if(userName == null || userName == ""){
-          String url = uIdUrl;
-          url += "?";
-          url += "channelName=";
-          url += channelName;
-          url += "&userAccount=";
-          url += EMClient.getInstance().getCurrentUser();
-          url += "&appkey=";
-          url +=  EMClient.getInstance().getOptions().getAppKey();
-          getUserIdAgoraUid(uid,url,callback);
-        }else{
-          //设置用户昵称 头像
-          setEaseCallKitUserInfo(userName);
-          EaseUserAccount account = new EaseUserAccount(uid,userName);
-          List<EaseUserAccount> accounts = new ArrayList<>();
-          accounts.add(account);
-          callback.onUserAccount(accounts);
+        if (userAccountCallbackMap == null) {
+          userAccountCallbackMap = new HashMap<>();
         }
+
+        userAccountCallbackMap.put(channelName, callback);
+
+        final Map<String, Object> data = new HashMap<>();
+        data.put("channel_name", channelName);
+        data.put("account", userName);
+        data.put("agora_uid", uid);
+
+        post(new Runnable() {
+          @Override
+          public void run() {
+            channel.invokeMethod("remoteUserDidJoinChannel", data);
+          }
+        });
       }
     };
+
     EaseCallKit.getInstance().setCallKitListener(callKitListener);
   }
 
 
-
-  /**
-   * 获取声网Token
-   *
-   */
-  private void getRtcToken(final String tokenUrl, final EaseCallKitTokenCallback callback){
-    new AsyncTask<String, Void, Pair<Integer, String>>(){
-      @Override
-      protected Pair<Integer, String> doInBackground(String... str) {
-        try {
-          Pair<Integer, String> response = EMHttpClient.getInstance().sendRequestWithToken(tokenUrl, null,EMHttpClient.GET);
-          return response;
-        }catch (HyphenateException exception) {
-          exception.printStackTrace();
-        }
-        return  null;
-      }
-      @Override
-      protected void onPostExecute(Pair<Integer, String> response) {
-        if(response != null) {
-          try {
-            int resCode = response.first;
-            if(resCode == 200){
-              String responseInfo = response.second;
-              if(responseInfo != null && responseInfo.length() > 0){
-                try {
-                  JSONObject object = new JSONObject(responseInfo);
-                  String token = object.getString("accessToken");
-                  int uId = object.getInt("agoraUserId");
-
-                  //设置自己头像昵称
-                  setEaseCallKitUserInfo(EMClient.getInstance().getCurrentUser());
-                  callback.onSetToken(token,uId);
-                }catch (Exception e){
-                  e.getStackTrace();
-                }
-              }else{
-                callback.onGetTokenError(response.first,response.second);
-              }
-            }else{
-              callback.onGetTokenError(response.first,response.second);
-            }
-          }catch (Exception e){
-            e.printStackTrace();
-          }
-        }else{
-          callback.onSetToken(null,0);
-        }
-      }
-    }.execute(tokenUrl);
-  }
-
-  /**
-   * 根据channelName和声网uId获取频道内所有人的UserId
-   * @param uId
-   * @param url
-   * @param callback
-   */
-  private void getUserIdAgoraUid(final int uId, final String url, final EaseGetUserAccountCallback callback){
-    new AsyncTask<String, Void, Pair<Integer, String>>(){
-      @Override
-      protected Pair<Integer, String> doInBackground(String... str) {
-        try {
-          Pair<Integer, String> response = EMHttpClient.getInstance().sendRequestWithToken(url, null,EMHttpClient.GET);
-          return response;
-        }catch (HyphenateException exception) {
-          exception.printStackTrace();
-        }
-        return  null;
-      }
-      @Override
-      protected void onPostExecute(Pair<Integer, String> response) {
-        if(response != null) {
-          try {
-            int resCode = response.first;
-            if(resCode == 200){
-              String responseInfo = response.second;
-              List<EaseUserAccount> userAccounts = new ArrayList<>();
-              if(responseInfo != null && responseInfo.length() > 0){
-                try {
-                  JSONObject object = new JSONObject(responseInfo);
-                  JSONObject resToken = object.getJSONObject("result");
-                  Iterator it = resToken.keys();
-                  while(it.hasNext()) {
-                    String uIdStr = it.next().toString();
-                    int uid = 0;
-                    uid = Integer.valueOf(uIdStr).intValue();
-                    String username = resToken.optString(uIdStr);
-                    if(uid == uId){
-                      //获取到当前用户的userName 设置头像昵称等信息
-                      setEaseCallKitUserInfo(username);
-                    }
-                    userAccounts.add(new EaseUserAccount(uid, username));
-                  }
-                  callback.onUserAccount(userAccounts);
-                }catch (Exception e){
-                  e.getStackTrace();
-                }
-              }else{
-                callback.onSetUserAccountError(response.first,response.second);
-              }
-            }else{
-              callback.onSetUserAccountError(response.first,response.second);
-            }
-          }catch (Exception e){
-            e.printStackTrace();
-          }
-        }else{
-          callback.onSetUserAccountError(100,"response is null");
-        }
-      }
-    }.execute(url);
-  }
-
-
-  /**
-   * 设置callKit 用户头像昵称
-   * @param userName
-   */
-  private void setEaseCallKitUserInfo(final String userName){
-
-    final EMValueCallBack<Map<String,EMUserInfo>> callBack = new EMValueCallBack<Map<String, EMUserInfo>>() {
-      @Override
-      public void onSuccess(Map<String, EMUserInfo> value) {
-        EaseCallUserInfo userInfo = new EaseCallUserInfo();
-        EMUserInfo cUserInfo = value.get(userName);
-        if(cUserInfo != null){
-          userInfo.setNickName(cUserInfo.getUserId());
-          userInfo.setHeadImage(cUserInfo.getAvatarUrl());
-        }
-        EaseCallKit.getInstance().getCallKitConfig().setUserInfo(userName,userInfo);
-      }
-
-      @Override
-      public void onError(int error, String errorMsg) {
-      }
-    };
-
-    String[] userIds = new String[1];
-    userIds[0] = userName;
-    EMClient.getInstance().userInfoManager().fetchUserInfoByUserId(userIds,callBack);
-
-  }
 
   private static HashMap<String, Object> JsonObjectToHashMap(JSONObject data) throws JSONException {
     HashMap<String, Object> map = new HashMap<String,Object>();
@@ -430,22 +401,20 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   private EaseCallKitConfig configFromJson(JSONObject map) throws JSONException {
     EaseCallKitConfig config = new EaseCallKitConfig();
     config.setAgoraAppId(map.getString("agora_app_id"));
-    String headImageStr = map.getString("default_head_image_url");
-    if (headImageStr.length() > 0) {
-      config.setDefaultHeadImage(headImageStr);
+
+    if (map.has("default_head_image_url")) {
+      config.setDefaultHeadImage(map.getString("default_head_image_url"));
     }
 
-    int callTimeOut = map.getInt("call_timeout");
-    if (callTimeOut > 0) {
+    if (map.has("call_timeout")) {
       config.setCallTimeOut(map.getInt("call_timeout"));
     }
-    String ringURL = map.getString("ring_file_url");
-    if (ringURL.length() > 0) {
-      config.setRingFile(ringURL);
+
+    if (map.has("ring_file_url")) {
+      config.setRingFile(map.getString("ring_file_url"));
     }
 
-    this.enableRTCTokenValidate = map.getBoolean("enable_rtc_token_validate");
-    config.setEnableRTCToken(this.enableRTCTokenValidate);
+    config.setEnableRTCToken(map.has("enable_rtc_token_validate") ? map.getBoolean("enable_rtc_token_validate") : true);
     Map<String, EaseCallUserInfo> userMap = new HashMap<>();
     if (map.has("user_map")) {
       JSONArray usersList = map.getJSONArray("user_map");
@@ -461,13 +430,18 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private EaseCallUserInfo userInfoFromJson(JSONObject map) throws JSONException {
-    String name = map.getString("nickname");
+
+    String name = null;
+    if(map.has("nickname")) {
+      name = map.getString("nickname");
+    }
+
     String headImage = null;
-    if (map.get("avatar_url") != null) {
+    if (map.has("avatar_url")) {
       headImage = map.getString("avatar_url");
     }
 
-    EaseCallUserInfo userInfo = new EaseCallUserInfo(name, null);
+    EaseCallUserInfo userInfo = new EaseCallUserInfo(name, headImage);
 
     return userInfo;
   }
@@ -485,7 +459,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private int reasonToInt(EaseCallEndReason reason) {
-    int intReason = 0;
+    int intReason = 1;
     switch (reason) {
     case EaseCallEndReasonHangup:
       intReason = 1;
