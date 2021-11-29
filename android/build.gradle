@@ -39,7 +39,10 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    api 'io.hyphenate:ease-call-kit:3.8.6.1'
+    api 'io.hyphenate:hyphenate-chat:3.8.3'
+    api ('io.hyphenate:ease-call-kit:3.8.6.1'){
+    exclude group: 'io.hyphenate',module: 'hyphenate-chat'
+}
 }
 
 
