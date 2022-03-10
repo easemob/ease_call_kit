@@ -407,7 +407,7 @@ public class EaseCallKitPlugin implements FlutterPlugin, MethodCallHandler {
     }
 
     if (map.has("call_timeout")) {
-      config.setCallTimeOut(map.getInt("call_timeout"));
+      config.setCallTimeOut(map.getInt("call_timeout") * 1000);
     }
 
     if (map.has("ring_file_url")) {
